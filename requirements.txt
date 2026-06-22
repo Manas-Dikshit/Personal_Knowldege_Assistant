@@ -1,5 +1,7 @@
-sentence-transformers
-faiss-cpu
-numpy
-pypdf
+fastapi
+uvicorn
 requests
+numpy
+faiss-cpu
+sentence-transformers
+pydantic
