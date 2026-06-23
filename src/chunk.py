@@ -1,73 +1,281 @@
 import re
+from typing import List
 
 
-# -------------------------
-# Generic text cleaner
-# -------------------------
-def clean_text(text):
-    text = re.sub(r'\n+', '\n', text)
-    text = re.sub(r'\s+', ' ', text)
+# --------------------------------------------------------------------
+# Text cleanup
+# --------------------------------------------------------------------
+
+def clean_text(text: str) -> str:
+    """
+    Normalize whitespace while preserving paragraph boundaries.
+    """
+
+    if not text:
+        return ""
+
+    text = text.replace("\r\n", "\n")
+    text = text.replace("\r", "\n")
+
+    # remove trailing spaces
+    text = re.sub(r"[ \t]+", " ", text)
+
+    # normalize excessive blank lines
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
     return text.strip()
 
 
-# -------------------------
-# Smart chunker
-# -------------------------
-def chunk_text(text, chunk_size=800, overlap=150):
+# --------------------------------------------------------------------
+# Paragraph splitter
+# --------------------------------------------------------------------
+
+def split_paragraphs(text: str) -> List[str]:
     """
-    Generic semantic-ish chunking using sliding window
+    Split text into logical paragraphs.
     """
+
+    paragraphs = [
+        p.strip()
+        for p in re.split(r"\n\s*\n", text)
+        if p.strip()
+    ]
+
+    return paragraphs
+
+
+# --------------------------------------------------------------------
+# Sentence splitter
+# --------------------------------------------------------------------
+
+def split_sentences(text: str) -> List[str]:
+    """
+    Lightweight sentence segmentation.
+    """
+
+    sentences = re.split(
+        r'(?<=[.!?])\s+(?=[A-Z])',
+        text
+    )
+
+    return [s.strip() for s in sentences if s.strip()]
+
+
+# --------------------------------------------------------------------
+# Generic semantic chunking
+# --------------------------------------------------------------------
+
+def chunk_text(
+    text: str,
+    max_chars: int = 900,
+    overlap_chars: int = 150
+) -> List[str]:
+    """
+    Create chunks while preserving paragraph boundaries.
+
+    Uses paragraph packing instead of naive slicing.
+    """
+
     text = clean_text(text)
+
+    paragraphs = split_paragraphs(text)
 
     chunks = []
-    start = 0
+    current_chunk = ""
 
-    while start < len(text):
-        end = start + chunk_size
-        chunk = text[start:end]
+    for paragraph in paragraphs:
 
-        chunks.append(chunk)
-        start = end - overlap
+        if len(paragraph) > max_chars:
+            sentences = split_sentences(paragraph)
+
+            for sentence in sentences:
+
+                candidate = (
+                    current_chunk + " " + sentence
+                ).strip()
+
+                if len(candidate) <= max_chars:
+                    current_chunk = candidate
+
+                else:
+
+                    if current_chunk:
+                        chunks.append(current_chunk)
+
+                    current_chunk = sentence
+
+            continue
+
+        candidate = (
+            current_chunk + "\n\n" + paragraph
+        ).strip()
+
+        if len(candidate) <= max_chars:
+            current_chunk = candidate
+
+        else:
+
+            if current_chunk:
+                chunks.append(current_chunk)
+
+            current_chunk = paragraph
+
+    if current_chunk:
+        chunks.append(current_chunk)
+
+    # overlap
+    final_chunks = []
+
+    for i, chunk in enumerate(chunks):
+
+        if i == 0:
+            final_chunks.append(chunk)
+            continue
+
+        prev = chunks[i - 1]
+
+        overlap = prev[-overlap_chars:]
+
+        final_chunks.append(
+            overlap + "\n\n" + chunk
+        )
+
+    return final_chunks
+
+
+# --------------------------------------------------------------------
+# Resume chunking
+# --------------------------------------------------------------------
+
+RESUME_HEADERS = [
+    "summary",
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "certifications",
+    "achievements",
+    "publications",
+    "volunteering"
+]
+
+
+def chunk_resume(text: str) -> List[str]:
+    """
+    Chunk resumes by sections.
+    """
+
+    text = clean_text(text)
+
+    pattern = (
+        r"(?i)(?=^("
+        + "|".join(RESUME_HEADERS)
+        + r")\b)"
+    )
+
+    sections = re.split(
+        pattern,
+        text,
+        flags=re.MULTILINE
+    )
+
+    chunks = []
+
+    buffer = ""
+
+    for section in sections:
+
+        section = section.strip()
+
+        if len(section) < 40:
+            continue
+
+        buffer += "\n\n" + section
+
+        if len(buffer) >= 300:
+            chunks.append(buffer.strip())
+            buffer = ""
+
+    if buffer:
+        chunks.append(buffer.strip())
 
     return chunks
 
 
-# -------------------------
-# Resume chunking (structured)
-# -------------------------
-def chunk_resume(text):
+# --------------------------------------------------------------------
+# README chunking
+# --------------------------------------------------------------------
+
+def chunk_readme(text: str) -> List[str]:
+    """
+    Preserve markdown structure.
+    """
+
     text = clean_text(text)
 
-    # split by sections if possible
-    sections = re.split(r'\n\s*\n', text)
+    sections = re.split(
+        r"(?m)^#{1,6}\s+",
+        text
+    )
 
-    chunks = [s.strip() for s in sections if len(s.strip()) > 50]
+    chunks = []
+
+    for section in sections:
+
+        section = section.strip()
+
+        if len(section) < 50:
+            continue
+
+        if len(section) <= 1200:
+            chunks.append(section)
+
+        else:
+            chunks.extend(
+                chunk_text(
+                    section,
+                    max_chars=900
+                )
+            )
 
     return chunks
 
 
-# -------------------------
-# README chunking (better quality)
-# -------------------------
-def chunk_readme(text):
+# --------------------------------------------------------------------
+# Contribution / commit logs
+# --------------------------------------------------------------------
+
+def chunk_contribution(text: str) -> List[str]:
+    """
+    Group related contribution lines together
+    instead of treating every line independently.
+    """
+
     text = clean_text(text)
 
-    # split by headings or paragraphs
-    parts = re.split(r'\n#{1,6}|\n\n', text)
+    lines = [
+        line.strip()
+        for line in text.split("\n")
+        if line.strip()
+    ]
 
-    chunks = [p.strip() for p in parts if len(p.strip()) > 40]
+    chunks = []
+    current = ""
 
-    return chunks
+    for line in lines:
 
+        candidate = (
+            current + "\n" + line
+        ).strip()
 
-# -------------------------
-# Contribution chunking
-# -------------------------
-def chunk_contribution(text):
-    text = clean_text(text)
+        if len(candidate) < 600:
+            current = candidate
 
-    lines = text.split("\n")
+        else:
+            chunks.append(current)
+            current = line
 
-    chunks = [line.strip() for line in lines if len(line.strip()) > 20]
+    if current:
+        chunks.append(current)
 
     return chunks

@@ -3,33 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRD AI</title>
+    <title>MRD Assistant</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <div class="header">
-            <h1>MRD AI</h1>
-            <p>Ask anything about MRD</p>
-        </div>
+    <!-- Header -->
+    <header class="header">
 
-        <div class="chat-container" id="chat-container">
+        <div class="assistant-info">
 
-            <div class="message bot">
-                Hello! I'm MRD AI. Ask me anything about MRD's projects, experience, and skills.
+            <div>
+                <h1>MRD Assistant</h1>
+
+                <p>
+                    Ask anything about projects, experience and skills.
+                </p>
+            </div>
+
+            <div class="assistant-status">
+                <span class="status-dot"></span>
+                Online
             </div>
 
         </div>
 
+    </header>
+
+
+    <!-- Welcome -->
+    <section class="welcome-section">
+
+        <h2>
+            How can I help you today?
+        </h2>
+
+        <p>
+            Ask anything about MRD's projects, technologies, experience and achievements.
+        </p>
+
+    </section>
+
+
+    <!-- Suggestions -->
+
+    <section class="suggestions">
+
+        <button class="suggestion-card">
+            Featured Projects
+        </button>
+
+        <button class="suggestion-card">
+            Experience
+        </button>
+
+        <button class="suggestion-card">
+            Technical Skills
+        </button>
+
+        <button class="suggestion-card">
+            Certifications
+        </button>
+
+    </section>
+
+
+    <!-- Chat -->
+
+    <main class="chat-container" id="chat-container">
+
+        <div class="message bot">
+
+            <div class="message-content">
+
+                Hello! I'm MRD Assistant.
+
+                Ask me anything about MRD's projects, experience and skills.
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- Input -->
+
+    <section class="input-section">
+
         <div class="input-container">
 
             <textarea
-                    id="message-input"
-                    placeholder="Message MRD AI..."
-                    rows="1"></textarea>
+                id="message-input"
+                placeholder="Message MRD Assistant..."
+                rows="1"></textarea>
 
             <button id="send-btn">
                 Send
@@ -37,9 +113,17 @@
 
         </div>
 
-    </div>
+        <div class="footer-text">
 
-    <script src="script.js"></script>
+            MRD Assistant may produce inaccurate information. Verify important information.
+
+        </div>
+
+    </section>
+
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>

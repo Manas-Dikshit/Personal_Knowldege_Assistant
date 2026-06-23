@@ -1,57 +1,173 @@
-import os
+from pathlib import Path
 import base64
 import requests
+from typing import List, Dict, Optional
 
 
 GITHUB_USERNAME = "Manas-Dikshit"
-OUTPUT_FOLDER = "data/github"
+OUTPUT_DIR = Path("data/github")
+
+# Optional token to increase rate limits
+GITHUB_TOKEN = None
+
+BASE_URL = "https://api.github.com"
 
 
-def get_repos():
-    url = f"https://api.github.com/users/Manas-Dikshit/repos"
-    repos = requests.get(url).json()
-    return repos
+session = requests.Session()
+
+headers = {
+    "Accept": "application/vnd.github+json"
+}
+
+if GITHUB_TOKEN:
+    headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+
+session.headers.update(headers)
 
 
-def get_readme(repo_name):
-    url = f"https://api.github.com/repos/Manas-Dikshit/{repo_name}/readme"
+def get_repositories() -> List[Dict]:
+    """
+    Fetch all repositories for a user.
+    Handles GitHub pagination.
+    """
 
-    headers = {
-        "Accept": "application/vnd.github.v3+json"
-    }
+    repositories = []
+    page = 1
 
-    res = requests.get(url, headers=headers)
+    while True:
 
-    if res.status_code != 200:
+        url = (
+            f"{BASE_URL}/users/{GITHUB_USERNAME}/repos"
+            f"?per_page=100&page={page}"
+        )
+
+        response = session.get(
+            url,
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        batch = response.json()
+
+        if not batch:
+            break
+
+        repositories.extend(batch)
+
+        page += 1
+
+    return repositories
+
+
+def get_readme(repo_name: str) -> Optional[str]:
+    """
+    Retrieve README content from a repository.
+    """
+
+    url = (
+        f"{BASE_URL}/repos/"
+        f"{GITHUB_USERNAME}/{repo_name}/readme"
+    )
+
+    try:
+
+        response = session.get(
+            url,
+            timeout=15
+        )
+
+        if response.status_code != 200:
+            return None
+
+        payload = response.json()
+
+        encoded_content = payload.get("content")
+
+        if not encoded_content:
+            return None
+
+        decoded = base64.b64decode(
+            encoded_content
+        ).decode(
+            "utf-8",
+            errors="ignore"
+        )
+
+        return decoded.strip()
+
+    except requests.RequestException:
         return None
 
-    content = res.json()["content"]
-    decoded = base64.b64decode(content).decode("utf-8")
 
-    return decoded
+def save_repository(repo: Dict, readme: Optional[str]) -> None:
+    """
+    Save repository metadata and README.
+    """
+
+    OUTPUT_DIR.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    repo_name = repo["name"]
+
+    path = OUTPUT_DIR / f"{repo_name}.md"
+
+    content = f"""
+Repository: {repo_name}
+
+Description:
+{repo.get("description") or "No description"}
+
+Language:
+{repo.get("language") or "Unknown"}
+
+Topics:
+{", ".join(repo.get("topics", []))}
+
+Stars:
+{repo.get("stargazers_count", 0)}
+
+Repository URL:
+{repo.get("html_url")}
+
+README:
+
+{readme or "No README found"}
+"""
+
+    with open(
+        path,
+        "w",
+        encoding="utf-8"
+    ) as file:
+        file.write(content.strip())
 
 
-def save_readme(repo_name, content):
-    if not content:
-        return
+def fetch_all_readmes() -> None:
+    """
+    Fetch metadata and README for every repository.
+    """
 
-    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+    repositories = get_repositories()
 
-    file_path = os.path.join(OUTPUT_FOLDER, f"{repo_name}_README.md")
+    print(f"Found {len(repositories)} repositories.\n")
 
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    for repo in repositories:
 
+        repo_name = repo["name"]
 
-def fetch_all_readmes():
-    repos = get_repos()
+        print(f"Fetching {repo_name}")
 
-    for repo in repos:
-        name = repo["name"]
-        print(f"Fetching README: {name}")
+        readme = get_readme(repo_name)
 
-        readme = get_readme(name)
-        save_readme(name, readme)
+        save_repository(
+            repo,
+            readme
+        )
+
+    print("\nFinished.")
 
 
 if __name__ == "__main__":

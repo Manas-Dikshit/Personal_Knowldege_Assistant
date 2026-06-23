@@ -1,20 +1,94 @@
+from dataclasses import dataclass
+from typing import Dict, List, Optional
+
 import numpy as np
-from src.embed import embed_single
+
+from src.embed import embed_query
 from src.vectorstore import VectorStore
 
 
+@dataclass
+class RetrievedChunk:
+    text: str
+    score: float
+    metadata: Dict
+
+
 class Retriever:
-    def __init__(self, dim):
+
+    def __init__(
+        self,
+        dim: int,
+        default_k: int = 5
+    ):
         self.store = VectorStore(dim=dim)
+        self.default_k = default_k
 
-    def search(self, query, k=5):
-        # 1. convert query → embedding
-        q_vec = embed_single(query)
+    def retrieve(
+        self,
+        query: str,
+        k: Optional[int] = None
+    ) -> List[RetrievedChunk]:
 
-        # 2. reshape for FAISS
-        q_vec = np.array([q_vec]).astype("float32")
+        if not query.strip():
+            return []
 
-        # 3. search in vector DB
-        results = self.store.search(q_vec, k=k)
+        k = k or self.default_k
 
-        return results
+        # Embed query
+        query_embedding = embed_query(query)
+
+        # Shape for FAISS
+        query_embedding = (
+            np.asarray([query_embedding])
+            .astype(np.float32)
+        )
+
+        # Search vector store
+        results = self.store.search(
+            query_embedding,
+            k=k
+        )
+
+        chunks = []
+
+        for result in results:
+
+            chunks.append(
+                RetrievedChunk(
+                    text=result["text"],
+                    score=result["score"],
+                    metadata=result["metadata"]
+                )
+            )
+
+        return chunks
+
+    def search(
+        self,
+        query: str,
+        k: Optional[int] = None
+    ) -> List[RetrievedChunk]:
+        """
+        Alias for compatibility.
+        """
+        return self.retrieve(
+            query,
+            k
+        )
+
+    def get_context(
+        self,
+        query: str,
+        k: Optional[int] = None
+    ) -> str:
+
+        chunks = self.retrieve(
+            query,
+            k
+        )
+
+        return "\n\n".join(
+            chunk.text
+            for chunk in chunks
+        )

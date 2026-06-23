@@ -2,32 +2,67 @@ const chatContainer = document.getElementById("chat-container");
 const input = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 
+let isLoading = false;
+
 function addMessage(text, sender) {
+
     const div = document.createElement("div");
 
-    div.classList.add("message");
-    div.classList.add(sender);
+    div.className = `message ${sender}`;
 
-    div.innerText = text;
+    div.textContent = text;
 
     chatContainer.appendChild(div);
 
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
+
+    return div;
+}
+
+function addTypingIndicator() {
+
+    const div = document.createElement("div");
+
+    div.className = "message bot typing";
+
+    div.innerHTML = `
+        <span></span>
+        <span></span>
+        <span></span>
+    `;
+
+    chatContainer.appendChild(div);
+
+    scrollToBottom();
+
+    return div;
+}
+
+function scrollToBottom() {
+
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: "smooth"
+    });
+
 }
 
 async function sendMessage() {
 
     const message = input.value.trim();
 
-    if (!message) return;
+    if (!message || isLoading) return;
 
-    // Show user message
+    isLoading = true;
+
     addMessage(message, "user");
 
     input.value = "";
+    input.style.height = "auto";
 
-    // Show thinking message
-    addMessage("Thinking...", "bot");
+    sendBtn.disabled = true;
+
+    const typingBubble = addTypingIndicator();
 
     try {
 
@@ -35,9 +70,11 @@ async function sendMessage() {
             "http://127.0.0.1:8000/chat",
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
                     message: message
                 })
@@ -46,24 +83,28 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        // Remove "Thinking..."
-        chatContainer.lastChild.remove();
+        typingBubble.remove();
 
-        // Show AI response
         addMessage(data.response, "bot");
 
     }
     catch (error) {
 
-        console.error(error);
-
-        chatContainer.lastChild.remove();
+        typingBubble.remove();
 
         addMessage(
-            "Unable to connect to MRD AI backend.",
+            "Unable to connect to MRD Assistant.",
             "bot"
         );
+
+        console.error(error);
+
     }
+
+    isLoading = false;
+
+    sendBtn.disabled = false;
+
 }
 
 sendBtn.addEventListener("click", sendMessage);
@@ -77,5 +118,14 @@ input.addEventListener("keydown", (e) => {
         sendMessage();
 
     }
+
+});
+
+
+input.addEventListener("input", () => {
+
+    input.style.height = "auto";
+
+    input.style.height = input.scrollHeight + "px";
 
 });

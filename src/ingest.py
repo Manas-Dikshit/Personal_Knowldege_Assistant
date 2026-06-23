@@ -1,68 +1,219 @@
-from pypdf import PdfReader
 from pathlib import Path
+from typing import Dict, List, Tuple
+from pypdf import PdfReader
 
 
-# -------------------------
-# RESUME LOADER
-# -------------------------
-def load_resume(path):
-    reader = PdfReader(path)
-    text = ""
+# ---------------------------------------------------------------------
+# PDF Loader
+# ---------------------------------------------------------------------
+
+def load_resume(path: str) -> str:
+    """
+    Extract text from a PDF resume.
+    """
+
+    pdf_path = Path(path)
+
+    if not pdf_path.exists():
+        raise FileNotFoundError(
+            f"Resume not found: {pdf_path}"
+        )
+
+    reader = PdfReader(pdf_path)
+
+    pages = []
 
     for page in reader.pages:
-        page_text = page.extract_text()
-        if page_text:
-            text += page_text + "\n"
 
-    return text.strip()
+        text = page.extract_text()
 
+        if text:
+            pages.append(text.strip())
 
-# -------------------------
-# GITHUB README LOADER (ROBUST)
-# -------------------------
-def load_github_readmes(folder):
-    path = Path(folder)
-
-    readmes = []
-
-    # Find ALL markdown files anywhere in folder
-    for file in path.rglob("*"):
-        if file.is_file() and file.suffix.lower() == ".md":
-            try:
-                content = file.read_text(encoding="utf-8", errors="ignore").strip()
-
-                if len(content) > 0:
-                    readmes.append({
-                        "repo": file.parent.name,
-                        "file": file.name,
-                        "text": content
-                    })
-
-            except Exception as e:
-                print(f"⚠️ Skipped {file}: {e}")
-
-    # Contribution history
-    contrib_file = path / "contribution-history.txt"
-    contrib_text = ""
-
-    if contrib_file.exists():
-        contrib_text = contrib_file.read_text(encoding="utf-8", errors="ignore").strip()
-
-    return readmes, contrib_text
+    return "\n\n".join(pages)
 
 
-# -------------------------
-# MAIN PIPELINE INPUT
-# -------------------------
-def load_all_data():
+# ---------------------------------------------------------------------
+# Markdown Loader
+# ---------------------------------------------------------------------
+
+def load_markdown_files(folder: str) -> List[Dict]:
+    """
+    Load markdown files recursively and attach metadata.
+    """
+
+    root = Path(folder)
+
+    if not root.exists():
+        return []
+
+    documents = []
+
+    for file in root.rglob("*.md"):
+
+        try:
+
+            content = file.read_text(
+                encoding="utf-8",
+                errors="ignore"
+            ).strip()
+
+            if not content:
+                continue
+
+            documents.append(
+                {
+                    "source": "github",
+                    "repo": file.stem,
+                    "path": str(
+                        file.relative_to(root)
+                    ),
+                    "filename": file.name,
+                    "text": content
+                }
+            )
+
+        except Exception as exc:
+
+            print(
+                f"Skipped {file}: {exc}"
+            )
+
+    return documents
+
+
+# ---------------------------------------------------------------------
+# Contribution History Loader
+# ---------------------------------------------------------------------
+
+def load_contribution_history(
+    folder: str
+) -> str:
+    """
+    Load contribution history if available.
+    """
+
+    path = (
+        Path(folder)
+        / "contribution-history.txt"
+    )
+
+    if not path.exists():
+        return ""
+
+    return path.read_text(
+        encoding="utf-8",
+        errors="ignore"
+    ).strip()
+
+
+# ---------------------------------------------------------------------
+# Generic Text Loader
+# ---------------------------------------------------------------------
+
+def load_text_files(
+    folder: str,
+    suffix: str = ".txt"
+) -> List[Dict]:
+    """
+    Load arbitrary text files.
+    """
+
+    root = Path(folder)
+
+    if not root.exists():
+        return []
+
+    documents = []
+
+    for file in root.rglob(f"*{suffix}"):
+
+        try:
+
+            text = file.read_text(
+                encoding="utf-8",
+                errors="ignore"
+            ).strip()
+
+            if text:
+
+                documents.append(
+                    {
+                        "source": "text",
+                        "path": str(
+                            file.relative_to(root)
+                        ),
+                        "text": text
+                    }
+                )
+
+        except Exception:
+
+            continue
+
+    return documents
+
+
+# ---------------------------------------------------------------------
+# Main Data Loader
+# ---------------------------------------------------------------------
+
+def load_all_data() -> Dict:
+    """
+    Load all knowledge sources.
+    """
+
     resume_path = "data/resume/resume.pdf"
-    github_path = "data/github"
+    github_folder = "data/github"
 
-    resume_text = load_resume(resume_path)
-    readmes, contrib_text = load_github_readmes(github_path)
+    resume_text = load_resume(
+        resume_path
+    )
+
+    github_documents = load_markdown_files(
+        github_folder
+    )
+
+    contribution_text = (
+        load_contribution_history(
+            github_folder
+        )
+    )
 
     return {
-        "resume": resume_text,
-        "readmes": readmes,
-        "contribution": contrib_text
+        "resume": {
+            "source": "resume",
+            "text": resume_text
+        },
+
+        "github": github_documents,
+
+        "contributions": {
+            "source": "contributions",
+            "text": contribution_text
+        }
     }
+
+
+# ---------------------------------------------------------------------
+# Example
+# ---------------------------------------------------------------------
+
+if __name__ == "__main__":
+
+    data = load_all_data()
+
+    print(
+        "\nResume length:",
+        len(data["resume"]["text"])
+    )
+
+    print(
+        "Repositories loaded:",
+        len(data["github"])
+    )
+
+    print(
+        "Contribution characters:",
+        len(data["contributions"]["text"])
+    )
