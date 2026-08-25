@@ -329,8 +329,21 @@ def chunk_linkedin(
 
 
 if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+    from src.linkedin import chunk_linkedin
+
     folder = Path(__file__).resolve().parent.parent / "data" / "linkedin"
     chunks, stats = chunk_linkedin(folder)
+
+    print(f"files       : {stats['files']}")
+    print(f"records     : {stats['records']}")
+    print(f"duplicates  : {stats['duplicates']}")
+    print(f"skipped     : {len(stats['skipped'])}")
+    for item in stats["skipped"]:
+        print(f"  - {item['file']}: {item['reason']}")
+    print(f"chunks      : {len(chunks)}")
 
     print(f"files       : {stats['files']}")
     print(f"records     : {stats['records']}")
