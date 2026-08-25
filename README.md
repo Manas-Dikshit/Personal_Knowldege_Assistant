@@ -96,7 +96,7 @@ pip install -r requirements.txt
 ollama pull llama3
 
 # optional: fetch fresh GitHub data (set GITHUB_TOKEN to avoid rate limits)
-set GITHUB_TOKEN=ghp_xxx          # Windows (optional)
+copy .env.example .env          # then put your token in it (git-ignored)
 python src/github_fetch.py
 
 # build/rebuild the FAISS knowledge base, then start the CLI chat
