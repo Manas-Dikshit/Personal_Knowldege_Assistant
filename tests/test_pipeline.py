@@ -132,9 +132,9 @@ def test_chunk_resume_sections():
         + "\n\nEducation\n" + "y" * 100
     )
     chunks = chunk_resume(resume)
-    assert len(chunks) == 1  # both sections pack under the buffer limit
-    assert "Summary" in chunks[0]["text"] and "Education" in chunks[0]["text"]
-    assert chunks[0]["section"] in ("Summary", "Education")
+    assert len(chunks) == 2  # one chunk per section
+    assert chunks[0]["section"] == "Summary"
+    assert chunks[1]["section"] == "Education"
 
 
 def test_chunk_resume_lossless_short_lines_kept():
