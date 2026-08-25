@@ -43,6 +43,10 @@ def load_resume(path: str) -> str:
 def load_markdown_files(folder: str) -> List[Dict]:
     """
     Load markdown files recursively and attach metadata.
+
+    Repo_README.md is a raw duplicate of the README already embedded in
+    Repo.md (written by github_fetch.py). The duplicate is skipped only
+    when the fetched file verifiably contains the same content.
     """
 
     root = Path(folder)
@@ -50,38 +54,53 @@ def load_markdown_files(folder: str) -> List[Dict]:
     if not root.exists():
         return []
 
-    documents = []
+    def _key(text: str) -> str:
+        return "".join(text.split())
 
-    for file in root.rglob("*.md"):
+    files = sorted(root.rglob("*.md"))
 
+    contents = {}
+    for file in files:
         try:
-
-            content = file.read_text(
+            contents[file] = file.read_text(
                 encoding="utf-8",
                 errors="ignore"
             ).strip()
+        except Exception as exc:
+            print(f"Skipped {file}: {exc}")
 
-            if not content:
+    documents = []
+
+    for file in files:
+
+        content = contents.get(file, "")
+
+        if not content:
+            continue
+
+        # Skip raw README duplicates that are already contained in Repo.md.
+        if file.stem.endswith("_README"):
+            base = file.with_name(
+                f"{file.stem.removesuffix('_README')}.md"
+            )
+            if (
+                base in contents
+                and _key(contents.get(base, "")) .find(_key(content)) != -1
+            ):
                 continue
 
-            documents.append(
-                {
-                    "source": "github",
-                    # Both Repo.md and Repo_README.md may exist; group them.
-                    "repo": file.stem.removesuffix("_README"),
-                    "path": str(
-                        file.relative_to(root)
-                    ),
-                    "filename": file.name,
-                    "text": content
-                }
-            )
-
-        except Exception as exc:
-
-            print(
-                f"Skipped {file}: {exc}"
-            )
+        documents.append(
+            {
+                "source": "github",
+                # Both Repo.md and Repo_README.md may exist; group them.
+                "repo": file.stem.removesuffix("_README"),
+                "path": str(
+                    file.relative_to(root)
+                ),
+                "filename": file.name,
+                "text": content
+            }
+        )
 
     return documents
 
