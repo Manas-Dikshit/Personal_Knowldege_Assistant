@@ -67,7 +67,8 @@ def load_markdown_files(folder: str) -> List[Dict]:
             documents.append(
                 {
                     "source": "github",
-                    "repo": file.stem,
+                    # Both Repo.md and Repo_README.md may exist; group them.
+                    "repo": file.stem.removesuffix("_README"),
                     "path": str(
                         file.relative_to(root)
                     ),
