@@ -524,7 +524,8 @@ body {
 
     .traffic-lights { gap: 6px; }
     .tl { width: 10px; height: 10px; }
-    .titlebar-center .logo { height: 22px; max-width: 160px; }
+    .logo-chip { width: 30px; height: 30px; border-radius: 8px; }
+    .titlebar-center .logo { height: 23px; width: 23px; }
 
     .chat-scroll { padding: 18px 14px; gap: 14px; }
 
