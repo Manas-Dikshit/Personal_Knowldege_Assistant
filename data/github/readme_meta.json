@@ -598,5 +598,75 @@
     "size_bytes": 952,
     "sha256": "0b8b7a8dc0edda293f68fc0a1c2e31dc28d2537c054adb4643bcd2b561d86d4e",
     "fetched_at": "2026-08-25T13:30:25.488368+00:00"
+  },
+  "musicblocks-v4": {
+    "repo": "musicblocks-v4",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/musicblocks-v4/blob/develop/README.md",
+    "github_sha": "ded69de18f6ddd01d42a86e5532d543d3ad5c913",
+    "size_bytes": 1892,
+    "sha256": "05f21e837c7ce46f465432671ac82a9a4a934d6569947607355961b3e7332801",
+    "fetched_at": "2026-08-25T13:30:26.166548+00:00"
+  },
+  "My-Portfolio": {
+    "repo": "My-Portfolio",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/My-Portfolio/blob/main/README.md",
+    "github_sha": "c7ef5ddd5051af7457f52a82a9a045092fa89e0e",
+    "size_bytes": 2512,
+    "sha256": "44cf8e68b30f5338de6b75e92ea3bab59f7d4502f6db076901b56d1664addc78",
+    "fetched_at": "2026-08-25T13:30:26.696487+00:00"
+  },
+  "Nimbus": {
+    "repo": "Nimbus",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Nimbus/blob/main/README.md",
+    "github_sha": "eb27780d000cf071a4b18fe870d028edd7c33631",
+    "size_bytes": 6619,
+    "sha256": "4cb191fff5ebed4ebb38a5db82dcceff7cbdc0f392143e9ad2733c323e30d64d",
+    "fetched_at": "2026-08-25T13:30:27.278990+00:00"
+  },
+  "noa-libre": {
+    "repo": "noa-libre",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/noa-libre/blob/master/README.md",
+    "github_sha": "c2a2254b13b6bff44e5785ec8c09330114a53518",
+    "size_bytes": 1219,
+    "sha256": "ed77fb18601c732ae66634d93cfaad40e2ca4e88f4baacd1366c5e52fc0524c5",
+    "fetched_at": "2026-08-25T13:30:27.852578+00:00"
+  },
+  "openmrs-module-coreapps": {
+    "repo": "openmrs-module-coreapps",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/openmrs-module-coreapps/blob/master/README.md",
+    "github_sha": "e4384aec7a39d6229b5288b1020e5f1ac527c6b1",
+    "size_bytes": 3062,
+    "sha256": "b6b3b05c8657112f98e6f41bcd71895514f46c66c8f005487c2c98a07f5474cf",
+    "fetched_at": "2026-08-25T13:30:28.920768+00:00"
+  },
+  "openmrs-module-oauth2login": {
+    "repo": "openmrs-module-oauth2login",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/openmrs-module-oauth2login/blob/master/README.md",
+    "github_sha": "63c1947e3d9dddf2817e90a182ce8a1da2d99188",
+    "size_bytes": 12219,
+    "sha256": "285c420c45d113935327ae77dda1eb201f44dc088009bda068408967a38917a9",
+    "fetched_at": "2026-08-25T13:30:29.577620+00:00"
+  },
+  "OpenSourceChatBot": {
+    "repo": "OpenSourceChatBot",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/OpenSourceChatBot/blob/main/README.md",
+    "github_sha": "7fdbe7a91be5340eef78249cddba8ed8770f84d5",
+    "size_bytes": 2074,
+    "sha256": "0df42cd87b179f4a09410428fb217ff2d56857812372e356158b07e669df80d4",
+    "fetched_at": "2026-08-25T13:30:30.116822+00:00"
   }
 }
