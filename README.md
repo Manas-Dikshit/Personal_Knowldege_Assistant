@@ -68,10 +68,22 @@ Personal_Knowledge_Assistant
 
 ## How It Works
 
-1. `github_fetch.py` pulls repository metadata + READMEs from the GitHub API into `data/github/`.
+1. `github_fetch.py` pulls repository metadata + READMEs from the GitHub API into `data/github/`. The token is read from the `GITHUB_TOKEN` env var or a `.env` file (see `.env.example`).
 2. `main.py` loads all sources (`ingest.py`), splits them into chunks preserving section structure (`chunk.py`), embeds them (`embed.py`), and stores everything in FAISS (`vectorstore.py`).
 3. On each question, the query is embedded, top-k chunks are retrieved, combined into a prompt, and sent to Ollama.
 4. The answer is returned via CLI or the `/chat` API to the web frontend.
+
+### Lossless README chunking
+
+READMEs are chunked by a dedicated markdown-aware splitter (`chunk.chunk_markdown`) with a hard guarantee: **the concatenation of all chunks contains the complete original README** — every heading, paragraph, list row, table row, and code line appears exactly once, in order.
+
+- Headings stay attached to their sections; each chunk records its `section` title in metadata.
+- Fenced code blocks are never split open, and `#` lines inside them are not treated as headings.
+- Tables and lists are kept as contiguous blocks.
+- Small sections are packed together instead of being dropped; oversized blocks are split at line boundaries.
+- Chunk metadata includes repo name, path, section title, and chunk index (`chunk_index`/`total_chunks`).
+- `tests/test_pipeline.py` verifies losslessness on synthetic edge cases; the corpus-wide check runs during ingestion.
+- Raw `Repo_README.md` duplicates are skipped at load time when their content is verified to be already contained in the fetched `Repo.md`.
 
 ## Setup
 
