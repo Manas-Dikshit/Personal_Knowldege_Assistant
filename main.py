@@ -75,6 +75,9 @@ def build_documents():
                 }
             )
 
+    # LinkedIn exports (already chunked by the dedicated module)
+    documents.extend(data["linkedin_chunks"])
+
     if not documents:
         raise RuntimeError(
             "No indexable content found. Check your data/ directory."
