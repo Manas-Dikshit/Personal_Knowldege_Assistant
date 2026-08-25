@@ -396,6 +396,12 @@ if __name__ == "__main__":
         test_chunk_readme_oversize_hard_split_no_loss,
         test_chunk_readme_single_long_line,
         test_chunk_resume_sections,
+        test_chunk_resume_lossless_short_lines_kept,
+        test_fetch_readme_rst_and_case_variants,
+        test_fetch_readme_missing_404,
+        test_fetch_readme_truncated_then_retry,
+        test_store_readme_unicode_and_stale_replacement,
+        test_ingest_no_silent_loss_end_to_end,
         test_vectorstore_roundtrip,
         test_vectorstore_corrupt_metadata,
     ]
