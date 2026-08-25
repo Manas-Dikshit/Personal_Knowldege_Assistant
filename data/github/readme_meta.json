@@ -1,0 +1,192 @@
+{
+  "Aavahan2026": {
+    "repo": "Aavahan2026",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Aavahan2026/blob/master/README.md",
+    "github_sha": "09abeed2a6ce616472c18aa4dea243bc10215708",
+    "size_bytes": 1737,
+    "sha256": "65d2601031f1729643ce71c34facdbf2ed7313e2a4a426f277adc7f6c7d6dd8e",
+    "fetched_at": "2026-08-25T13:29:26.450583+00:00"
+  },
+  "appinventor-sources": {
+    "repo": "appinventor-sources",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/appinventor-sources/blob/master/README.md",
+    "github_sha": "e21d3a07c4ba3ae4fe8db1a30f63b2c34f11dd67",
+    "size_bytes": 13202,
+    "sha256": "bfad6b77a69b06381c6a580493e3cac109dd8e5263aaa30a80a6f21552323548",
+    "fetched_at": "2026-08-25T13:29:28.027257+00:00"
+  },
+  "AQI_HCHO_Model": {
+    "repo": "AQI_HCHO_Model",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/AQI_HCHO_Model/blob/main/README.md",
+    "github_sha": "95fa488d5fafdbd5b301496410299b4720e4a39d",
+    "size_bytes": 16278,
+    "sha256": "303a89af3f77548d3c8978835a64674d9fce84a153b50ad231c99302aa443624",
+    "fetched_at": "2026-08-25T13:29:28.570630+00:00"
+  },
+  "awesome-llm-apps": {
+    "repo": "awesome-llm-apps",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/awesome-llm-apps/blob/main/README.md",
+    "github_sha": "126625b7df33f0b827ca1193ca36ff22c36c9e8e",
+    "size_bytes": 14763,
+    "sha256": "bb116d286da359291dd7d5e4ec3c2e33aea1cb75b0455e04bbcb354d7d20565f",
+    "fetched_at": "2026-08-25T13:29:29.728843+00:00"
+  },
+  "Back_Haul": {
+    "repo": "Back_Haul",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Back_Haul/blob/main/README.md",
+    "github_sha": "ec64e25474390755eaf0d09e41cb5be52938c102",
+    "size_bytes": 10910,
+    "sha256": "6a1aa90aacf2d7ea3c992793c9d44d3dd95405b23ad8ca6dd0c85b96d81f4839",
+    "fetched_at": "2026-08-25T13:29:30.346786+00:00"
+  },
+  "beam": {
+    "repo": "beam",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/beam/blob/master/README.md",
+    "github_sha": "20921881e3a26b70d8047f846ca0703fb2f816ae",
+    "size_bytes": 8969,
+    "sha256": "a8f1961da616065832d4698246f64dfadb9d5049c5a85e46dc469c4f3dda8618",
+    "fetched_at": "2026-08-25T13:29:31.473882+00:00"
+  },
+  "Beehive": {
+    "repo": "Beehive",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Beehive/blob/main/README.md",
+    "github_sha": "4708d0e53c6712e96950cd8e789a71085144998a",
+    "size_bytes": 911,
+    "sha256": "433ddf1d42b48800323bcfa4def1d66a95f78cb031fae1b284a6b889b67e52b5",
+    "fetched_at": "2026-08-25T13:29:32.085663+00:00"
+  },
+  "blockly-plugins": {
+    "repo": "blockly-plugins",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/blockly-plugins/blob/main/README.md",
+    "github_sha": "a7ebc88f52d236447015d65e2a2b4287e92042da",
+    "size_bytes": 304,
+    "sha256": "47e18fec4967b7954b53a98523c04f1b8cc738286d25c24e8230be93d7ac33fa",
+    "fetched_at": "2026-08-25T13:29:33.313340+00:00"
+  },
+  "Byte-Crafters": {
+    "repo": "Byte-Crafters",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Byte-Crafters/blob/main/README.md",
+    "github_sha": "ae9313f7c4e383af8846106d6362b304cbc29c3d",
+    "size_bytes": 1602,
+    "sha256": "f748af51e972d48aa6aa82e4a4c7efddad52cb3dd4ffd26e55059fdb4663fb07",
+    "fetched_at": "2026-08-25T13:29:33.931083+00:00"
+  },
+  "cancerhotspots": {
+    "repo": "cancerhotspots",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/cancerhotspots/blob/master/README.md",
+    "github_sha": "d1ebf489d5a3617fc4ec143ef97a0acef6909030",
+    "size_bytes": 309,
+    "sha256": "52c54fef39b1ad36ed890d7235889b3dc3f895acdcb284c04179904923180f9a",
+    "fetched_at": "2026-08-25T13:29:34.543461+00:00"
+  },
+  "cbioportal-frontend": {
+    "repo": "cbioportal-frontend",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/cbioportal-frontend/blob/master/README.md",
+    "github_sha": "7a4724444250a18720c9df92f01589f2d37307e5",
+    "size_bytes": 18812,
+    "sha256": "0b9ecff151539665d1c2246b993e9eb58f99cf6f64b2899c3ce76297c71c1590",
+    "fetched_at": "2026-08-25T13:29:35.364304+00:00"
+  },
+  "cbioportal-zarr-loader": {
+    "repo": "cbioportal-zarr-loader",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/cbioportal-zarr-loader/blob/main/README.md",
+    "github_sha": "390eaa4437fab952c5e861cbb8d9b2e732dc858e",
+    "size_bytes": 432,
+    "sha256": "7cb106ea4347afc78d3168753c7a2afe3f3a889cfa6fe2bc5d1d9461468b99c6",
+    "fetched_at": "2026-08-25T13:29:36.113761+00:00"
+  },
+  "chatbot": {
+    "repo": "chatbot",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/chatbot/blob/master/README.md",
+    "github_sha": "eb89978db1441b5ca4762c3138ad9546b1e999bc",
+    "size_bytes": 4429,
+    "sha256": "03aa620a192b953932e814feb972c84fe9efa0a4fe9dc1e37267e9305486b74e",
+    "fetched_at": "2026-08-25T13:29:37.290366+00:00"
+  },
+  "ChatBot-Test": {
+    "repo": "ChatBot-Test",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/ChatBot-Test/blob/main/README.md",
+    "github_sha": "09a8a4d2c4eadd6bb56f5e72afd0830b38773eaf",
+    "size_bytes": 1449,
+    "sha256": "c8cbfb7c54536f39eaeda5b05db38f2c1991e272fe0fe64a019eb6b7b7aa57f9",
+    "fetched_at": "2026-08-25T13:29:37.907848+00:00"
+  },
+  "checkstyle": {
+    "repo": "checkstyle",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/checkstyle/blob/master/README.md",
+    "github_sha": "60bd36615872ad1a67de3f3b8cc1a189af0d2685",
+    "size_bytes": 8929,
+    "sha256": "e4b75757fd255a7c1617148347a40b7280fd049d4e39ca208f67cda363d21865",
+    "fetched_at": "2026-08-25T13:29:38.515876+00:00"
+  },
+  "clinical-data-dictionary": {
+    "repo": "clinical-data-dictionary",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/clinical-data-dictionary/blob/master/README.md",
+    "github_sha": "857ef6bb9af2411fef46ae74fc0ac27f7af347cc",
+    "size_bytes": 557,
+    "sha256": "3de8b1cce3eb8c62afa8077bb035d5fad96a8688a98e5e2fdd877e66d4449af2",
+    "fetched_at": "2026-08-25T13:29:39.086530+00:00"
+  },
+  "cloudstack": {
+    "repo": "cloudstack",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/cloudstack/blob/main/README.md",
+    "github_sha": "f66a4dc6f9752c542e8c2623278fe3f7f8acc88f",
+    "size_bytes": 9269,
+    "sha256": "69bcadc42559767fb09e89095b9ce11467c9081d589fa79ce606bf084ed91287",
+    "fetched_at": "2026-08-25T13:29:39.702661+00:00"
+  },
+  "Cold_mail_-agent": {
+    "repo": "Cold_mail_-agent",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Cold_mail_-agent/blob/main/README.md",
+    "github_sha": "f90c928c7610e7f545728daea442a0645a1dd552",
+    "size_bytes": 6002,
+    "sha256": "a994e1973c53047b088da8861903a0d16f18506560f09dace12b939a94bc5bc9",
+    "fetched_at": "2026-08-25T13:29:40.383485+00:00"
+  },
+  "Cover_Page_Generator": {
+    "repo": "Cover_Page_Generator",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Cover_Page_Generator/blob/main/README.md",
+    "github_sha": "1d44e057c9cb4dcb8fef0d0905a886b96f9f71dc",
+    "size_bytes": 9968,
+    "sha256": "c4c06c26c67755b43687960cd79766cfbfc610e753ae0e5bc14a03664fba2788",
+    "fetched_at": "2026-08-25T13:29:40.997128+00:00"
+  }
+}

@@ -1,22 +1,3 @@
-Repository: cbioportal-frontend
-
-Description:
-React Frontend of cBioPortal :tada:
-
-Language:
-TypeScript
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/cbioportal-frontend
-
-README:
-
 # cbioportal-frontend
 This repo contains the frontend code for cBioPortal which uses React, MobX and TypeScript. Read more about the architecture of cBioPortal [here](https://docs.cbioportal.org/2.1-deployment/architecture-overview).
 

@@ -1,22 +1,3 @@
-Repository: Byte-Crafters
-
-Description:
-Hack-Verse
-
-Language:
-HTML
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/Byte-Crafters
-
-README:
-
 # Byte-Crafters
 
 # Neutrino AI
@@ -62,3 +43,4 @@ Neutrino AI is an intelligent platform that provides personalized mental health 
    python manage.py migrate
 4. Start Django Server
    python manage.py runserver
+

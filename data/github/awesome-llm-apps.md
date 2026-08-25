@@ -1,22 +1,3 @@
-Repository: awesome-llm-apps
-
-Description:
-Collection of awesome LLM apps with AI Agents and RAG using OpenAI, Anthropic, Gemini and opensource models.
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/awesome-llm-apps
-
-README:
-
 <p align="center">
   <a href="http://www.theunwindai.com">
     <img src="docs/banner/unwind_black.png" width="900px" alt="Unwind AI">

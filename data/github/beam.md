@@ -1,22 +1,3 @@
-Repository: beam
-
-Description:
-Apache Beam is a unified programming model for Batch and Streaming data processing.
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/beam
-
-README:
-
 <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file

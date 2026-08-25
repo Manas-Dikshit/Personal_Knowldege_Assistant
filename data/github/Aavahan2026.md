@@ -1,21 +1,3 @@
-Repository: Aavahan2026
-
-Description:
-This is the official site of the annual cultural fest of SUIIT, Burla.
-
-Language:
-JavaScript
-
-Topics:
-
-
-Stars:
-2
-
-Repository URL:
-https://github.com/Manas-Dikshit/Aavahan2026
-
-README:
 
 # AAVAHAN Official Website
 

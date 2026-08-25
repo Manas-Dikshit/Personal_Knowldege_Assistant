@@ -1,22 +1,3 @@
-Repository: Beehive
-
-Description:
-A Data Federation Approach to Analyze Behavioral Health and Supplement Healthcare Practice with Community Health Metrics in Alaska
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/Beehive
-
-README:
-
 # Beehive
 A Data Federation Approach to Analyze Behavioral Health and Complement Healthcare Practice with Community Health Metrics in Alaska
 

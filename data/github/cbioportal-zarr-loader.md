@@ -1,22 +1,3 @@
-Repository: cbioportal-zarr-loader
-
-Description:
-No description
-
-Language:
-JavaScript
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/cbioportal-zarr-loader
-
-README:
-
 # cbioportal-zarr-loader
 
 A monorepo for loading and visualizing data using backed by Zarr.

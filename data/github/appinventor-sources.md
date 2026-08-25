@@ -1,22 +1,3 @@
-Repository: appinventor-sources
-
-Description:
-MIT App Inventor Public Open Source
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/appinventor-sources
-
-README:
-
 # Welcome to MIT App Inventor
 
 ## Introduction

@@ -1,22 +1,3 @@
-Repository: ChatBot-Test
-
-Description:
-No description
-
-Language:
-HTML
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/ChatBot-Test
-
-README:
-
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

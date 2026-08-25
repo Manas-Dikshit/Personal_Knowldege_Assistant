@@ -1,22 +1,3 @@
-Repository: AQI_HCHO_Model
-
-Description:
-No description
-
-Language:
-Jupyter Notebook
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/AQI_HCHO_Model
-
-README:
-
 # ISRO Hackathon — Surface AQI & HCHO Hotspot Detection over India
 
 **Problem Statement (ISRO SIH 2024):**
@@ -59,7 +40,7 @@ A **7-page Streamlit dashboard** integrates all outputs for interactive explorat
 
 ## Objectives
 
-| # | Objective | Approach |
+| # |Objective|Approach|
 |---|-----------|----------|
 | 1 | Predict surface AQI (PM2.5, overall AQI) | Satellite + met features → RF / GBM / CNN-LSTM → gridded AQI maps |
 | 2 | Detect HCHO hotspots from biomass burning | TROPOMI HCHO + FIRMS fire → 90th-pct flagging + DBSCAN clustering + wind transport |

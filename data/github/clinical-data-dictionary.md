@@ -1,22 +1,3 @@
-Repository: clinical-data-dictionary
-
-Description:
-Clinical Attribute Web Service for retrieving clinical attribute names and metadata.
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/clinical-data-dictionary
-
-README:
-
 # clinical-data-dictionary
 
 Clinical Attribute Web Service for retrieving clinical attribute names and metadata.
@@ -37,3 +18,5 @@ $ cd clinical-data-dictionary
 
 $ export set SERVER_PORT=8091; mvn package -Dpackaging.type=jar && java -jar target/cdd.jar
 ```
+
+
