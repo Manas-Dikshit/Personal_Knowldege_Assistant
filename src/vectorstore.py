@@ -203,6 +203,12 @@ class VectorStore:
                     "'python main.py'."
                 )
 
+        elif self.index.ntotal > 0:
+            raise RuntimeError(
+                f"Missing metadata file for existing index "
+                f"({self.index.ntotal} vectors). Rebuild with 'python main.py'."
+            )
+
         else:
             self.documents = []
 
