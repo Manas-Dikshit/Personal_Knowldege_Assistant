@@ -1,6 +1,9 @@
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
+
 from pypdf import PdfReader
+
+from src.config import GITHUB_DIR, RESUME_PATH
 
 
 # ---------------------------------------------------------------------
