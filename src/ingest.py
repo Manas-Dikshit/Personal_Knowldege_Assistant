@@ -85,7 +85,7 @@ def load_markdown_files(folder: str) -> List[Dict]:
             )
             if (
                 base in contents
-                and _key(contents.get(base, "")) .find(_key(content)) != -1
+                and _key(contents.get(base, "")).find(_key(content)) != -1
             ):
                 continue
 
