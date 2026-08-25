@@ -1,20 +1,13 @@
-Repository: Timesheet
+You have successfully created an Atlassian Plugin!
 
-Description:
-Timesheet plugin for Jira
+Here are the SDK commands you'll use immediately:
 
-Language:
-Java
+* atlas-run   -- installs this plugin into the product and starts it on localhost
+* atlas-debug -- same as atlas-run, but allows a debugger to attach at port 5005
+* atlas-cli   -- after atlas-run or atlas-debug, opens a Maven command line window:
+                 - 'pi' reinstalls the plugin into the running product instance
+* atlas-help  -- prints description for all commands in the SDK
 
-Topics:
+Full documentation is always available at:
 
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/Timesheet
-
-README:
-
-No README found
+https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK

@@ -858,5 +858,55 @@
     "size_bytes": 6766,
     "sha256": "960e2000a94adaecfe0d2da455b432be8bfba4670ff7cfefa00921f9dde4e15d",
     "fetched_at": "2026-08-25T13:30:45.297327+00:00"
+  },
+  "thread-loader": {
+    "repo": "thread-loader",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/thread-loader/blob/main/README.md",
+    "github_sha": "5bacb16e529998ba61eba2ba8ba418c4d5b5c0c4",
+    "size_bytes": 4183,
+    "sha256": "1b47a51a34762e9b9b03849d01262f1abb8faf908564d781e348c48659b33e2d",
+    "fetched_at": "2026-08-25T13:30:45.884630+00:00"
+  },
+  "THREATCAST": {
+    "repo": "THREATCAST",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/THREATCAST/blob/main/README.md",
+    "github_sha": "249de78d8b5b3ce1bb6bcb007bcd1c07803d6dfd",
+    "size_bytes": 5909,
+    "sha256": "e3dcd45f46f66909d27bdb13fac3e42cbe99ce28db83c7097029bda19820e389",
+    "fetched_at": "2026-08-25T13:30:46.854365+00:00"
+  },
+  "Timesheet": {
+    "repo": "Timesheet",
+    "path": "README",
+    "readme_type": "plain",
+    "source_url": "https://github.com/Manas-Dikshit/Timesheet/blob/develop/README",
+    "github_sha": "94e6a43d33d8a35ae264bff4234ca86869a68c4c",
+    "size_bytes": 625,
+    "sha256": "11783e4303a2071eaab80efd7311da9e9ee237f7f9a349cfc7fdc044341b7b16",
+    "fetched_at": "2026-08-25T13:30:47.523513+00:00"
+  },
+  "tms_backend": {
+    "repo": "tms_backend",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/tms_backend/blob/main/README.md",
+    "github_sha": "1d3321af4327d611ca48f603d68bef8d74ffcee7",
+    "size_bytes": 6350,
+    "sha256": "74827f3ef3b8b6a9846f501476cf8184a3e159f24ea0a0b7bffd11ef999100e9",
+    "fetched_at": "2026-08-25T13:30:48.070411+00:00"
+  },
+  "tooling": {
+    "repo": "tooling",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/tooling/blob/main/README.md",
+    "github_sha": "9281777e5a3efade657c7944b92ec86d991d416a",
+    "size_bytes": 4979,
+    "sha256": "f9743eb63ddadbb2b4c76541446b06c6940368768004d0d67193f8d96fa5d9c8",
+    "fetched_at": "2026-08-25T13:30:48.683363+00:00"
   }
 }
