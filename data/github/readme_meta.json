@@ -798,5 +798,65 @@
     "size_bytes": 26472,
     "sha256": "3b31c4dbe9fc711b9bea671fb0132e16f229cc4627d7b3afb10dc3dd8186e5df",
     "fetched_at": "2026-08-25T13:30:40.082867+00:00"
+  },
+  "shardingsphere": {
+    "repo": "shardingsphere",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/shardingsphere/blob/master/README.md",
+    "github_sha": "5cdf24ad54f7d8eccff0fa8ad216b46a73bbbd2e",
+    "size_bytes": 13711,
+    "sha256": "ce543cdaab7015e31240d8b594a7e446e7f5d920c12b1e413b2761e51190d1a7",
+    "fetched_at": "2026-08-25T13:30:41.196897+00:00"
+  },
+  "SOS": {
+    "repo": "SOS",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/SOS/blob/develop/README.md",
+    "github_sha": "60e6d03a611e346c1334c344a5ad1f13c8d78e01",
+    "size_bytes": 30755,
+    "sha256": "1c062d796a330176a9342a39f8f42705684a11ad5002bc705ef9acdcdd4083c9",
+    "fetched_at": "2026-08-25T13:30:42.793907+00:00"
+  },
+  "spatialreference.org": {
+    "repo": "spatialreference.org",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/spatialreference.org/blob/master/README.md",
+    "github_sha": "aa72a8231678b610763e694e3ab58d5fcae8df14",
+    "size_bytes": 715,
+    "sha256": "293d7d9e44a8231f57d55aa6d2682bc8dc190630da50a7d786d1abbc9e4c53cf",
+    "fetched_at": "2026-08-25T13:30:43.456975+00:00"
+  },
+  "Student_Sync": {
+    "repo": "Student_Sync",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Student_Sync/blob/main/README.md",
+    "github_sha": "25ca90f7c85132f59b00e0a0283f75aff0f816c2",
+    "size_bytes": 3951,
+    "sha256": "13f1250d3a4a47079431e5d36d1eaa624641debc8ce5ca038bdf40958f362dce",
+    "fetched_at": "2026-08-25T13:30:44.073486+00:00"
+  },
+  "tck": {
+    "repo": "tck",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/tck/blob/master/README.md",
+    "github_sha": "636e0f0dd1e2f521dc724925a1f57c50c7acfcf5",
+    "size_bytes": 487,
+    "sha256": "ee8771c7a60f2c84806ccb900ea6172713d7c2d89c412474a0485ea636c4a1db",
+    "fetched_at": "2026-08-25T13:30:44.687302+00:00"
+  },
+  "TGS_Mail_Sender": {
+    "repo": "TGS_Mail_Sender",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/TGS_Mail_Sender/blob/main/README.md",
+    "github_sha": "2d2ec9e4adc83763e9369b99821e629f3a47538c",
+    "size_bytes": 6766,
+    "sha256": "960e2000a94adaecfe0d2da455b432be8bfba4670ff7cfefa00921f9dde4e15d",
+    "fetched_at": "2026-08-25T13:30:45.297327+00:00"
   }
 }

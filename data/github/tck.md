@@ -1,20 +1,7 @@
-Repository: tck
+# AsyncAPI tck
+AsyncAPI's Test Compatibility Kit (TCK) provides a way for AsyncAPI processors to test their level of compliance with the specification. This TCK contains a set of AsyncAPI documents meant to be used to test correct and incorrect usage of each AsyncAPI feature.
 
-Description:
-(WIP) Test Compatibility Suite for AsyncAPI
+The TCK is build for version >=2.0.0.
 
-Language:
-Java
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/tck
-
-README:
-
-No README found
+## Contributing
+We welcome contributions! If you have a new test case in mind, feel free to submit a pull request. More info on how to do that [here](./CONTRIBUTING.md).
