@@ -1,22 +1,3 @@
-Repository: lots
-
-Description:
-Letterhead, template, form, autotext, mail merge,... extension for LibreOffice
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/lots
-
-README:
-
 # LibreOffice Template System
 
 ## Introduction
