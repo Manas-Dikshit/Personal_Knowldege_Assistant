@@ -192,6 +192,12 @@ if __name__ == "__main__":
     tests = [
         test_clean_text,
         test_chunk_readme_keeps_headers,
+        test_chunk_readme_tiny_file_not_dropped,
+        test_chunk_readme_lossless_full_featured,
+        test_chunk_readme_code_fence_hash_not_heading,
+        test_chunk_readme_small_sections_packed_not_dropped,
+        test_chunk_readme_oversize_hard_split_no_loss,
+        test_chunk_readme_single_long_line,
         test_chunk_resume_sections,
         test_vectorstore_roundtrip,
         test_vectorstore_corrupt_metadata,
