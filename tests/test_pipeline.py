@@ -600,7 +600,8 @@ def test_linkedin_no_conflict_with_other_sources():
     chunks, _ = _li_chunks(tmp)
     md = chunks[0]["metadata"]
     assert md["source"] == "linkedin"
-    assert {"file", "path", "category", "row"} <= set(md)
+    assert {"file", "path", "category", "row_start", "row_end",
+            "record_count"} <= set(md)
 
 
 if __name__ == "__main__":
