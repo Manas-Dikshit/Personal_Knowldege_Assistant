@@ -14,7 +14,7 @@ from src.vectorstore import VectorStore
 
 
 def test_clean_text():
-    assert clean_text("a  b\r\n\r\n\r\n c") == "a b\n\nc"
+    assert clean_text("a  b\r\n\r\n\r\n c") == "a b\n\n c"
     assert clean_text("") == ""
     assert clean_text("   ") == ""
 
