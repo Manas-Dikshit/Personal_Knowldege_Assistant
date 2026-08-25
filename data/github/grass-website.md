@@ -1,22 +1,3 @@
-Repository: grass-website
-
-Description:
-Web site of GRASS GIS project (deployed from this repo twice a day)
-
-Language:
-HTML
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/grass-website
-
-README:
-
 # GRASS GIS Website Theme
 
 This repository contains the source code for the official **GRASS GIS project website**: [https://grass.osgeo.org/](https://grass.osgeo.org/)

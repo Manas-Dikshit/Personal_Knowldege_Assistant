@@ -1,22 +1,3 @@
-Repository: headlamp
-
-Description:
-A Kubernetes web UI that is fully-featured, user-friendly and extensible
-
-Language:
-TypeScript
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/headlamp
-
-README:
-
 <h1>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="frontend/src/resources/logo-light.svg">

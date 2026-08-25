@@ -1,22 +1,3 @@
-Repository: google-metadata-plugin
-
-Description:
-This plugin provides a basic framework for steps in a build’ slifecycle to attach JSON-serializable metadata to a build (as an invisible action).
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/google-metadata-plugin
-
-README:
-
 Jenkins Google Metadata Plugin
 =====================
 This plugin provides a basic framework for steps in a build’s lifecycle to attach JSON-serializable metadata to a build (as an invisible action).

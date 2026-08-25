@@ -1,22 +1,3 @@
-Repository: go-watermill-template
-
-Description:
-Go template for the AsyncAPI Generator using Watermill module
-
-Language:
-JavaScript
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/go-watermill-template
-
-README:
-
 [![AsyncAPI logo](./assets/logo_banner.png)](https://www.asyncapi.com)
 <!-- toc is generated with GitHub Actions do not remove toc markers -->
 

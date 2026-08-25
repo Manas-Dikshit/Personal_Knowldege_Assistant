@@ -268,5 +268,75 @@
     "size_bytes": 10377,
     "sha256": "c51235e668885b107e32a3cfb9899118eeb9b169952535aabc0a1261b616dbf3",
     "fetched_at": "2026-08-25T13:29:53.260903+00:00"
+  },
+  "FitCheck_AI": {
+    "repo": "FitCheck_AI",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/FitCheck_AI/blob/main/README.md",
+    "github_sha": "ada899664cb1a408797fbfe369e22650b543d957",
+    "size_bytes": 3439,
+    "sha256": "6e603216980645469e82f2302fe8719f89f707b46f5d54e5a3efc08686a55a14",
+    "fetched_at": "2026-08-25T13:29:53.837375+00:00"
+  },
+  "Github_Project_Analyzer": {
+    "repo": "Github_Project_Analyzer",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Github_Project_Analyzer/blob/main/README.md",
+    "github_sha": "eee34be2639e93e8ff8998da0f5c831ea95fe33f",
+    "size_bytes": 5500,
+    "sha256": "74fce95ead6321b60a7367b4cf7183a6688f9c0035ad20eed5ecbed9ff346b31",
+    "fetched_at": "2026-08-25T13:29:54.374287+00:00"
+  },
+  "go-watermill-template": {
+    "repo": "go-watermill-template",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/go-watermill-template/blob/master/README.md",
+    "github_sha": "a15680c55b01ea97bee51080dfc9c01639c553c4",
+    "size_bytes": 5992,
+    "sha256": "6922c10856728fe2dc98ea2c0f63e1c78180eff3c8147b14542aa66804808272",
+    "fetched_at": "2026-08-25T13:29:55.015927+00:00"
+  },
+  "google-metadata-plugin": {
+    "repo": "google-metadata-plugin",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/google-metadata-plugin/blob/develop/README.md",
+    "github_sha": "d13907928a2d3f8d3748458d1744dc788be8e6ea",
+    "size_bytes": 1540,
+    "sha256": "a7949324cb4002c0ea58e97c8095024ac3bdddca41deebf0e6e7760804f269b9",
+    "fetched_at": "2026-08-25T13:29:55.588458+00:00"
+  },
+  "grass-website": {
+    "repo": "grass-website",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/grass-website/blob/master/README.md",
+    "github_sha": "daf8d3bf143d983eb9ae014906d00143524e17b3",
+    "size_bytes": 3012,
+    "sha256": "6dafc917edbf21c79be6737b1cb8471c00948a976030ef22746db234934268cc",
+    "fetched_at": "2026-08-25T13:29:56.151258+00:00"
+  },
+  "Hand_Muscle_Evaluator": {
+    "repo": "Hand_Muscle_Evaluator",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Hand_Muscle_Evaluator/blob/main/README.md",
+    "github_sha": "dd7f485db4683b9edb455854c1f971eeb9016f57",
+    "size_bytes": 6089,
+    "sha256": "4148b18bb74065500c79488c72df63487efa2d54ea9f794e69eb0fff60855fbd",
+    "fetched_at": "2026-08-25T13:29:57.220489+00:00"
+  },
+  "headlamp": {
+    "repo": "headlamp",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/headlamp/blob/main/README.md",
+    "github_sha": "5ee929b8a4b6c1c6886ab2bc6337c72ff1158c71",
+    "size_bytes": 5432,
+    "sha256": "5d151c6ca7635380b22a19bbc6701ed5693dd5e15fedbe85fad7106346b0fbef",
+    "fetched_at": "2026-08-25T13:29:57.789765+00:00"
   }
 }
