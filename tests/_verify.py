@@ -41,7 +41,7 @@ queries = [
     ("activity: open-source contributions to Apache or CNCF", None),
     ("resume: what is the CGPA / education?", {"source": "resume"}),
     ("resume: programming languages and skills", {"source": "resume"}),
-    ("resume: contact email", {"source": "resume"}),
+    ("How can someone contact or reach Manas?", {"source": "resume"}),
 ]
 
 all_ok = True
