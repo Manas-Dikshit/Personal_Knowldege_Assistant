@@ -998,5 +998,25 @@
     "size_bytes": 9366,
     "sha256": "fc4f0d7ca8a23606b165e97ae2c2a8ea6bbe5d84bc64ff4a5f3070ebea620f07",
     "fetched_at": "2026-08-25T13:30:54.711224+00:00"
+  },
+  "Delhi_House_ML": {
+    "repo": "Delhi_House_ML",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Delhi_House_ML/blob/main/README.md",
+    "github_sha": "a077f638930d639f16c9e44f0d3fab7a44fc5ab6",
+    "size_bytes": 7790,
+    "sha256": "3dad9072283a3a00ee1c0a4d702c3a61170493efe3828150ca5c17dbaa48904c",
+    "fetched_at": "2026-08-25T13:34:33.230446+00:00"
+  },
+  "Distributed_Lock": {
+    "repo": "Distributed_Lock",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Distributed_Lock/blob/main/README.md",
+    "github_sha": "e01a8f2955f446e8d0ea29aee7c16aa21b2eee3d",
+    "size_bytes": 12918,
+    "sha256": "ef75ca2cdce480274192837b0318305e49f0a1acfeefe0bdd9256070be55598d",
+    "fetched_at": "2026-08-25T13:34:34.622898+00:00"
   }
 }
