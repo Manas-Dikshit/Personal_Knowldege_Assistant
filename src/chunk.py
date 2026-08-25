@@ -213,8 +213,9 @@ def chunk_readme(text: str) -> List[str]:
 
     text = clean_text(text)
 
+    # Lookahead split keeps each markdown heading attached to its section.
     sections = re.split(
-        r"(?m)^#{1,6}\s+",
+        r"(?m)(?=^#{1,6}\s)",
         text
     )
 
