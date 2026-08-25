@@ -59,16 +59,16 @@ def _read_text(path: Path) -> str:
 
 def parse_csv(
     path: Path
-) -> Tuple[Optional[List[str]], List[List[str]], List[str], int]:
+) -> Tuple[Optional[List[str]], List[List[str]]]:
     """
     Parse one CSV file.
 
-    Returns (header, records, skipped_reasons, preamble_lines).
+    Returns (header, records). header is None for empty/unparseable files.
 
     - Detects LinkedIn-style preamble notes before the real header by
       choosing, among the first rows, the one with the most columns.
     - Quoted fields and embedded newlines are handled by csv.reader.
-    - Empty rows are skipped; ragged rows are kept as-is (padded).
+    - Fully-empty rows are dropped; ragged rows are padded, never dropped.
     """
 
     text = _read_text(path)
@@ -77,35 +77,31 @@ def parse_csv(
     try:
         parsed = [row for row in csv.reader(lines)]
     except csv.Error as exc:
-        return None, [], [f"unparseable CSV: {exc}"], 0
+        raise ValueError(f"unparseable CSV: {exc}")
 
-    # Drop fully-empty rows but remember them (not errors).
     non_empty = [(i, row) for i, row in enumerate(parsed)
                  if any(field.strip() for field in row)]
 
     if not non_empty:
-        return None, [], [], len(parsed)
+        return None, []
 
-    # Header = highest column count among the first few rows.
+    # Header = highest column count among the first few non-empty rows.
     head_window = [
         (i, row) for i, row in non_empty
         if i <= non_empty[0][0] + 10
     ]
     header_idx, header = max(head_window, key=lambda item: len(item[1]))
 
-    if len(header) < 2:
-        # A single-column table (e.g., Skills.csv) still needs >=1 column;
-        # treat the widest row as header only if it has real field names.
-        pass
+    if len(header) < 1 or not any(field.strip() for field in header):
+        raise ValueError("no usable header row found")
 
     preamble = header_idx
-
+    width = len(header)
     header = [field.strip() for field in header]
 
     records = []
-    skipped = []
 
-    for idx, row in parsed[header_idx + 1:]:
+    for offset, row in enumerate(parsed[header_idx + 1:]):
 
         values = [field.strip() for field in row]
 
@@ -113,22 +109,18 @@ def parse_csv(
             continue
 
         # Pad ragged rows so record rendering never crashes.
-        if len(values) < len(header):
-            values += [""] * (len(header) - len(values))
+        if len(values) < width:
+            values += [""] * (width - len(values))
 
-        records.append(values)
+        # Keep the original 1-based CSV row number for provenance.
+        records.append((preamble + offset + 2, values))
 
-    _ = idx  # last loop var; not used further
-
-    return header, records, skipped, preamble
+    return header, records
 
 
 # ---------------------------------------------------------------------
 # Record -> semantic text (schema-driven, no hardcoded columns)
 # ---------------------------------------------------------------------
-
-_URN_NOISE_PREFIXES = ("urn:li:",)
-
 
 def render_record(
     category: str,
@@ -140,7 +132,7 @@ def render_record(
     Render one CSV row as semantic text.
 
     Returns (dedupe_key, text) or None when the row carries no
-    meaningful information (all fields empty or just URNs).
+    meaningful information (all fields empty or just object URNs).
     """
 
     lines = []
@@ -152,7 +144,7 @@ def render_record(
             continue
 
         # Raw object URNs alone carry no human-readable information.
-        if value.lower().startswith(_URN_NOISE_PREFIXES) and len(value) < 40:
+        if value.lower().startswith("urn:li:") and len(value) < 40:
             continue
 
         meaningful = True
@@ -188,16 +180,17 @@ def categorize(path: Path) -> str:
 # File-level loading
 # ---------------------------------------------------------------------
 
-def load_linkedin_records(folder) -> List[Dict]:
+def load_linkedin_records(folder) -> Tuple[List[Dict], Dict]:
     """
     Parse every CSV under folder into deduplicated rendered records.
 
-    Returns [{"text", "metadata", "dedupe_key"}]. One malformed file
-    never stops the others.
+    Returns (records, stats). Each record is
+    {"text", "metadata", "dedupe_key"}. One malformed file never stops
+    the others.
     """
 
-    documents: List[Dict] = []
-    seen: set = set()
+    records: List[Dict] = []
+    seen = set()
     stats = {"files": 0, "records": 0, "duplicates": 0, "skipped": []}
 
     for path in discover_csvs(folder):
@@ -206,27 +199,20 @@ def load_linkedin_records(folder) -> List[Dict]:
         category = categorize(path)
 
         try:
-            header, records, skipped, preamble = parse_csv(path)
+            header, rows = parse_csv(path)
         except Exception as exc:
             stats["skipped"].append({"file": path.name, "reason": str(exc)})
             continue
 
         if header is None:
             stats["skipped"].append(
-                {"file": path.name, "reason": "empty or unreadable"}
+                {"file": path.name, "reason": "empty file"}
             )
             continue
 
-        if skipped:
-            stats["skipped"].extend(
-                {"file": path.name, "reason": reason} for reason in skipped
-            )
-
         rel_path = str(path)
 
-        for offset, values in enumerate(records):
-
-            row_number = preamble + offset + 2  # 1-based CSV row number
+        for row_number, values in rows:
 
             rendered = render_record(category, header, values, row_number)
 
@@ -241,7 +227,7 @@ def load_linkedin_records(folder) -> List[Dict]:
 
             seen.add(dedupe_key)
 
-            documents.append(
+            records.append(
                 {
                     "text": text,
                     "metadata": {
@@ -256,19 +242,11 @@ def load_linkedin_records(folder) -> List[Dict]:
             )
             stats["records"] += 1
 
-    documents.sort(key=lambda d: (
+    records.sort(key=lambda d: (
         d["metadata"]["file"], d["metadata"]["row"]
     ))
 
-    documents_linkedin_stats = {
-        "files": stats["files"],
-        "records": stats["records"],
-        "duplicates": stats["duplicates"],
-        "skipped": stats["skipped"],
-    }
-    documents.append({"__stats__": documents_linkedin_stats})
-
-    return documents
+    return records, stats
 
 
 # ---------------------------------------------------------------------
@@ -278,31 +256,30 @@ def load_linkedin_records(folder) -> List[Dict]:
 def chunk_linkedin(
     folder,
     max_chars: int = CHUNK_MAX_CHARS
-) -> List[Dict]:
+) -> Tuple[List[Dict], Dict]:
     """
     Load all LinkedIn CSVs and pack their records into chunks.
 
-    Records from the same file/category stay together (semantic
-    coherence); a chunk never mixes files. Chunks carry metadata with
-    the source file, category, and covered CSV row range.
+    Records from the same file stay together (semantic coherence); a
+    chunk never mixes files. Chunk metadata carries source file,
+    category, covered CSV row range, and chunk indexes per file.
+
+    Returns (chunks, stats).
     """
 
-    loaded = load_linkedin_records(folder)
-
-    stats_entry = loaded[-1]
-    stats = stats_entry.get("__stats__", {}) if "__stats__" in stats_entry else {}
-    records = loaded[:-1] if "__stats__" in stats_entry else loaded
+    records, stats = load_linkedin_records(folder)
 
     chunks: List[Dict] = []
     current: List[Dict] = []
     current_len = 0
 
     def emit() -> None:
+        nonlocal current_len
+
         if not current:
             return
 
         first, last = current[0]["metadata"], current[-1]["metadata"]
-        total = len(chunks)
 
         chunks.append(
             {
@@ -315,13 +292,12 @@ def chunk_linkedin(
                     "record_count": len(current),
                     "row_start": first["row"],
                     "row_end": last["row"],
-                    "chunk_index": total + 1,
+                    "chunk_index": len(chunks),
                 },
             }
         )
         current.clear()
-
-    _ = current_len
+        current_len = 0
 
     for doc in records:
 
@@ -334,31 +310,32 @@ def chunk_linkedin(
             emit()
 
         current.append(doc)
-        current_len = sum(len(d["text"]) for d in current) + 2 * (len(current) - 1)
+        current_len += len(doc["text"]) + (2 if current_len else 0)
 
     emit()
 
-    # Fill chunk_index/total_chunks now that counts are known.
-    by_file: Dict[str, int] = {}
+    # Per-file totals for complete provenance metadata.
+    totals: Dict[str, int] = {}
     for chunk in chunks:
         key = chunk["metadata"]["file"]
-        by_file[key] = by_file.get(key, 0) + 1
-        chunk["metadata"]["chunk_index"] = by_file[key]
+        totals[key] = totals.get(key, 0) + 1
+        chunk["metadata"]["total_chunks"] = totals[key]
 
     for chunk in chunks:
-        chunk["metadata"]["total_chunks"] = by_file[chunk["metadata"]["file"]]
+        key = chunk["metadata"]["file"]
+        chunk["metadata"]["total_chunks"] = totals[key]
 
-    chunks.append(
-        {
-            "text": "",
-            "metadata": {},
-            "__stats__": stats,
-        }
-    )
-
-    return chunks
+    return chunks, stats
 
 
 if __name__ == "__main__":
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    folder = Path(__file__).resolve().parent.parent / "data" / "linkedin"
+    chunks, stats = chunk_linkedin(folder)
+
+    print(f"files       : {stats['files']}")
+    print(f"records     : {stats['records']}")
+    print(f"duplicates  : {stats['duplicates']}")
+    print(f"skipped     : {len(stats['skipped'])}")
+    for item in stats["skipped"]:
+        print(f"  - {item['file']}: {item['reason']}")
+    print(f"chunks      : {len(chunks)}")
