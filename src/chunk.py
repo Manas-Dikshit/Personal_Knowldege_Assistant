@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import Dict, List
 
 
 # --------------------------------------------------------------------
@@ -26,121 +26,210 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
-# --------------------------------------------------------------------
-# Paragraph splitter
-# --------------------------------------------------------------------
-
-def split_paragraphs(text: str) -> List[str]:
+def _normalize_markdown(text: str) -> str:
     """
-    Split text into logical paragraphs.
+    Lossless normalization for markdown: newline style + trailing spaces
+    + collapsed blank-line runs. No content is ever removed.
     """
 
-    paragraphs = [
-        p.strip()
-        for p in re.split(r"\n\s*\n", text)
-        if p.strip()
-    ]
+    if not text:
+        return ""
 
-    return paragraphs
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = "\n".join(line.rstrip() for line in text.split("\n"))
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    return text.strip()
 
 
 # --------------------------------------------------------------------
-# Sentence splitter
+# Markdown block tokenizer
 # --------------------------------------------------------------------
 
-def split_sentences(text: str) -> List[str]:
+HEADING_RE = re.compile(r"^#{1,6}\s")
+
+
+def _split_blocks(
+    text: str
+) -> List[Dict[str, str]]:
     """
-    Lightweight sentence segmentation.
+    Split markdown into atomic blocks without losing any content.
+
+    Each block is {"section": <current heading title>, "text": <block>}.
+    - Heading lines start a new section and stay attached to their content.
+    - Fenced code blocks (``` ... ```) are kept whole; '#' inside a fence
+      is never treated as a heading.
+    - Tables/lists/paragraphs become contiguous-line blocks.
     """
 
-    sentences = re.split(
-        r'(?<=[.!?])\s+(?=[A-Z])',
-        text
-    )
+    blocks: List[Dict[str, str]] = []
+    section = ""
+    buf: List[str] = []
+    in_fence = False
 
-    return [s.strip() for s in sentences if s.strip()]
+    def flush() -> None:
+        if buf:
+            block_text = "\n".join(buf).strip()
+            if block_text:
+                blocks.append(
+                    {"section": section, "text": block_text}
+                )
+            buf.clear()
+
+    for line in text.split("\n"):
+        stripped = line.strip()
+
+        if stripped.startswith("```"):
+            buf.append(line)
+            if not in_fence:
+                in_fence = True
+            else:
+                in_fence = False
+                flush()
+            continue
+
+        if in_fence:
+            buf.append(line)
+            continue
+
+        if HEADING_RE.match(stripped):
+            flush()
+            section = stripped.lstrip("#").strip()
+            buf.append(line)
+            continue
+
+        if not stripped:
+            flush()
+            continue
+
+        buf.append(line)
+
+    flush()
+
+    return blocks
 
 
-# --------------------------------------------------------------------
-# Generic semantic chunking
-# --------------------------------------------------------------------
-
-def chunk_text(
-    text: str,
-    max_chars: int = 900,
-    overlap_chars: int = 150
+def _hard_split(
+    block: str,
+    max_chars: int
 ) -> List[str]:
     """
-    Create chunks while preserving paragraph boundaries.
-
-    Uses paragraph packing instead of naive slicing.
+    Split an oversized block into contiguous pieces <= max_chars,
+    breaking at line boundaries when possible. Nothing is discarded.
     """
 
-    text = clean_text(text)
+    pieces: List[str] = []
+    current = ""
 
-    paragraphs = split_paragraphs(text)
+    for line in block.split("\n"):
 
-    chunks = []
-    current_chunk = ""
+        # Single line longer than max_chars: slice it.
+        while len(line) > max_chars:
+            if current:
+                pieces.append(current)
+                current = ""
+            pieces.append(line[:max_chars])
+            line = line[max_chars:]
 
-    for paragraph in paragraphs:
-
-        if len(paragraph) > max_chars:
-            sentences = split_sentences(paragraph)
-
-            for sentence in sentences:
-
-                candidate = (
-                    current_chunk + " " + sentence
-                ).strip()
-
-                if len(candidate) <= max_chars:
-                    current_chunk = candidate
-
-                else:
-
-                    if current_chunk:
-                        chunks.append(current_chunk)
-
-                    current_chunk = sentence
-
-            continue
-
-        candidate = (
-            current_chunk + "\n\n" + paragraph
-        ).strip()
+        candidate = f"{current}\n{line}" if current else line
 
         if len(candidate) <= max_chars:
-            current_chunk = candidate
-
+            current = candidate
         else:
+            if current:
+                pieces.append(current)
+            current = line
 
-            if current_chunk:
-                chunks.append(current_chunk)
+    if current:
+        pieces.append(current)
 
-            current_chunk = paragraph
+    return pieces
 
-    if current_chunk:
-        chunks.append(current_chunk)
 
-    # overlap
-    final_chunks = []
+def chunk_markdown(
+    text: str,
+    max_chars: int = 800
+) -> List[Dict[str, str]]:
+    """
+    Chunk markdown losslessly.
 
-    for i, chunk in enumerate(chunks):
+    Returns [{"text": ..., "section": ...}, ...] such that the chunks
+    collectively contain the complete original content (every non-blank
+    source line appears exactly once, in order). Small sections are packed
+    together instead of being dropped; oversized blocks are split at line
+    boundaries.
+    """
 
-        if i == 0:
-            final_chunks.append(chunk)
-            continue
+    normalized = _normalize_markdown(text)
 
-        prev = chunks[i - 1]
+    if not normalized:
+        return []
 
-        overlap = prev[-overlap_chars:]
+    blocks = _split_blocks(normalized)
 
-        final_chunks.append(
-            overlap + "\n\n" + chunk
+    chunks: List[Dict[str, str]] = []
+    current_lines: List[str] = []
+    current_len = 0
+    current_section = ""
+
+    def emit() -> None:
+        if current_lines:
+            chunks.append(
+                {
+                    "text": "\n\n".join(current_lines),
+                    "section": current_section
+                }
+            )
+            current_lines.clear()
+            current_len = 0  # noqa: cannot rebind closure var; handled below
+
+    for block in blocks:
+
+        if len(block["text"]) <= max_chars:
+            pieces = [block["text"]]
+        else:
+            pieces = _hard_split(block["text"], max_chars)
+
+        for piece in pieces:
+
+            if current_lines and current_len + 2 + len(piece) > max_chars:
+                chunks.append(
+                    {
+                        "text": "\n\n".join(current_lines),
+                        "section": current_section
+                    }
+                )
+                current_lines = []
+                current_len = 0
+
+            if not current_lines:
+                current_section = block["section"]
+
+            current_lines.append(piece)
+            current_len += (
+                len(piece) + (2 if current_len else 0)
+            )
+
+    if current_lines:
+        chunks.append(
+            {
+                "text": "\n\n".join(current_lines),
+                "section": current_section
+            }
         )
 
-    return final_chunks
+    return chunks
+
+
+def chunk_readme(
+    text: str,
+    max_chars: int = 800
+) -> List[Dict[str, str]]:
+    """
+    Backwards-compatible alias. Returns [{"text", "section"}, ...].
+    """
+
+    return chunk_markdown(text, max_chars)
 
 
 # --------------------------------------------------------------------
@@ -203,53 +292,12 @@ def chunk_resume(text: str) -> List[str]:
 
 
 # --------------------------------------------------------------------
-# README chunking
-# --------------------------------------------------------------------
-
-def chunk_readme(text: str) -> List[str]:
-    """
-    Preserve markdown structure.
-    """
-
-    text = clean_text(text)
-
-    # Lookahead split keeps each markdown heading attached to its section.
-    sections = re.split(
-        r"(?m)(?=^#{1,6}\s)",
-        text
-    )
-
-    chunks = []
-
-    for section in sections:
-
-        section = section.strip()
-
-        if len(section) < 50:
-            continue
-
-        if len(section) <= 1200:
-            chunks.append(section)
-
-        else:
-            chunks.extend(
-                chunk_text(
-                    section,
-                    max_chars=900
-                )
-            )
-
-    return chunks
-
-
-# --------------------------------------------------------------------
 # Contribution / commit logs
 # --------------------------------------------------------------------
 
 def chunk_contribution(text: str) -> List[str]:
     """
-    Group related contribution lines together
-    instead of treating every line independently.
+    Group related contribution lines together.
     """
 
     text = clean_text(text)
