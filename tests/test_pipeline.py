@@ -8,9 +8,30 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.chunk import chunk_readme, chunk_resume, clean_text
+from src.chunk import (
+    chunk_readme,
+    chunk_resume,
+    clean_text,
+    _normalize_markdown
+)
 
 from src.vectorstore import VectorStore
+
+
+def _content_lines(text):
+    """Non-blank lines of normalized text, the unit of content coverage."""
+    return [
+        line for line in _normalize_markdown(text).split("\n")
+        if line.strip()
+    ]
+
+
+def _assert_lossless(source, max_chars=800):
+    chunks = chunk_readme(source, max_chars=max_chars)
+    rebuilt = "\n\n".join(c["text"] for c in chunks)
+    assert _content_lines(rebuilt) == _content_lines(source), \
+        "chunking lost or reordered README content"
+    return chunks
 
 
 def test_clean_text():
