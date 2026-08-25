@@ -183,15 +183,19 @@ class FakeResponse:
         return self._payload
 
 
-def _api_readme_payload(content, name="README.md", size=None, path="README.md"):
-    raw = content.encode("utf-8")
+def _api_readme_payload(content, name="README.md", size=None, path="README.md",
+                        raw_bytes=None):
+    raw = raw_bytes if raw_bytes is not None else content.encode("utf-8")
     return {
         "name": name,
         "path": path,
         "sha": "abc123",
         "size": len(raw) if size is None else size,
         "html_url": f"https://github.com/u/repo/blob/main/{path}",
-        "content": _b64.b64encode(raw).decode("ascii"),
+        "download_url": f"https://raw.example/{path}",
+        "content": _b64.b64encode(
+            raw if isinstance(raw, bytes) else raw.encode("latin-1")
+        ).decode("ascii"),
         "encoding": "base64",
     }
 
