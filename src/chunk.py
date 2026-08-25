@@ -172,17 +172,6 @@ def chunk_markdown(
     current_len = 0
     current_section = ""
 
-    def emit() -> None:
-        if current_lines:
-            chunks.append(
-                {
-                    "text": "\n\n".join(current_lines),
-                    "section": current_section
-                }
-            )
-            current_lines.clear()
-            current_len = 0  # noqa: cannot rebind closure var; handled below
-
     for block in blocks:
 
         if len(block["text"]) <= max_chars:

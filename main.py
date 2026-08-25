@@ -34,14 +34,20 @@ def build_documents():
     # GitHub repositories
     for repo in data["github"]:
 
-        for chunk in chunk_readme(repo["text"]):
+        readme_chunks = chunk_readme(repo["text"])
+        total = len(readme_chunks)
+
+        for i, chunk in enumerate(readme_chunks):
             documents.append(
                 {
-                    "text": chunk,
+                    "text": chunk["text"],
                     "metadata": {
                         "source": "github",
                         "repo": repo["repo"],
-                        "path": repo["path"]
+                        "path": repo["path"],
+                        "section": chunk.get("section", ""),
+                        "chunk_index": i + 1,
+                        "total_chunks": total
                     }
                 }
             )
