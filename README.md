@@ -39,13 +39,15 @@ Everything runs **locally and free**: FAISS for vectors, a local embedding model
 Personal_Knowledge_Assistant
 ├── data/
 │   ├── resume/resume.pdf
-│   └── github/            # fetched repo summaries + READMEs
+│   ├── github/            # fetched raw READMEs + readme_meta.json
+│   └── linkedin/          # private LinkedIn CSV exports (git-ignored)
 │       ├── Repo.md
 │       └── contribution-history.txt
 ├── src/
 │   ├── config.py          # centralized paths & model constants
 │   ├── ingest.py          # load PDF / markdown / txt sources
 │   ├── chunk.py           # text cleaning + section-aware chunking
+│   ├── linkedin.py        # LinkedIn CSV export ingestion
 │   ├── embed.py           # BGE embeddings (lazy-loaded singleton)
 │   ├── vectorstore.py     # FAISS index + metadata persistence
 │   ├── retrieve.py        # top-k retrieval layer
@@ -82,6 +84,16 @@ Personal_Knowledge_Assistant
 - Retries with backoff on network/5xx errors, honors timeouts, and reports rate limits clearly.
 - Detects truncated responses and falls back to the raw download URL for non-UTF-8 files (e.g., UTF-16) with BOM-aware decoding.
 - Rejects empty/suspiciously short READMEs and removes stale local copies for repos whose README disappeared upstream.
+
+### LinkedIn CSV ingestion (`src/linkedin.py`)
+
+Drop your LinkedIn export ZIP contents into `data/linkedin/` (kept private via `.gitignore`). The importer:
+
+- Discovers every `.csv` recursively; nothing is hardcoded — categories come from file names, rendering is schema-driven.
+- Handles UTF-8/UTF-16/BOM encodings, quoted fields, commas and newlines inside fields, empty values, ragged rows, and Connections-style preamble notes.
+- Converts each record into semantic text (`LinkedIn positions record: Company Name: ... Title: ...`) with metadata for source file, category, and exact CSV row range.
+- Deduplicates identical records across exports by content hash.
+- One malformed file never blocks the others; failures are reported per file.
 
 ### Lossless chunking (READMEs and resume)
 
