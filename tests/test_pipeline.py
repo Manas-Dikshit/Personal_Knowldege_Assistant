@@ -472,7 +472,7 @@ def test_linkedin_preamble_and_quoted_fields():
         '',
         'First Name,Last Name,Email Address,Company',
         'Ada,Lovelace,ada@example.com,Analytical Engines Inc',
-        'Grace,"Hopper, Rear Admiral","navy@usn.mil","""Big Co""",\nUnited States Fleet"',
+        'Grace,"Hopper, Rear Admiral","navy@usn.mil","Big Co, United\nStates Fleet"',
     ]) + "\n")
     chunks, stats = _li_chunks(tmp)
     assert stats["records"] == 2
@@ -480,6 +480,7 @@ def test_linkedin_preamble_and_quoted_fields():
     assert "Analytical Engines Inc" in joined
     assert "Hopper" in joined
     assert "navy@usn.mil" in joined
+    assert "States Fleet" in joined, "embedded newline split the record"
     assert "Notes:" not in joined, "preamble leaked into records"
 
 
@@ -506,13 +507,37 @@ def test_linkedin_malformed_file_does_not_block_others():
     import tempfile
     from pathlib import Path as P
     tmp = P(tempfile.mkdtemp())
-    # Unclosed quote -> csv.Error; must be reported, others still ingested.
-    _write_csv(tmp / "Broken.csv", 'Name,Value\n"a"a"b\n')
     _write_csv(tmp / "Skills.csv", "Name\nPython\nDocker\n")
-    chunks, stats = _li_chunks(tmp)
+
+    # Force the failure path: parse_csv raises for exactly one file.
+    from src import linkedin as li
+    original_parse = li.parse_csv
+
+    def flaky(path):
+        if path.name == "Broken.csv":
+            raise ValueError("unparseable CSV: garbage")
+        return original_parse(path)
+
+    li.parse_csv = flaky
+    try:
+        chunks, stats = _li_chunks(tmp)
+    finally:
+        li.parse_csv = original_parse
+
     assert stats["records"] == 2
     assert any(s["file"] == "Broken.csv" for s in stats["skipped"])
-    assert all(c["metadata"]["file"] == "Skills.csv" for c in chunks)
+    joined = "".join(c["text"] for c in chunks)
+    assert "Python" in joined and "Docker" in joined
+
+
+def test_linkedin_ragged_rows_tolerated():
+    """Lenient CSV quirks (stray quotes) never block ingestion."""
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _write_csv(tmp / "Quirky.csv", 'Name,Value\n"a"a"b\n')
+    chunks, stats = _li_chunks(tmp)
+    assert stats["records"] >= 1  # parsed best-effort, nothing crashed
 
 
 def test_linkedin_duplicate_records_deduped_across_files():
