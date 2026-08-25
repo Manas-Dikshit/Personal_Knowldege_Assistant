@@ -7,44 +7,20 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from src.retrieve import Retriever
 
 r = Retriever()
-
-# query -> expected source type(s) in top hits
-checks = [
-    ("LinkedIn work experience at The Good Shelf", "linkedin", "positions"),
-    ("What degree did Manas study and where?", None, None),  # multi-source
-    ("Is English a listed language and at what proficiency?", "linkedin", "languages"),
-    ("Google cloud computing certification", "linkedin", "certifications"),
-    ("Neutrino AI project chatbot mental health", "linkedin", "projects"),
-    ("How many connections does Manas have on LinkedIn?", "linkedin", "connections"),
-    ("What job titles is Manas seeking as an intern?", "linkedin", "job seeker preferences"),
-    ("RabbitMQ skill", "linkedin", "skills"),
-    ("President of AWS Cloud Club SUIIT", "linkedin", "positions"),
+queries = [
+    "What internships or work positions has Manas held?",
+    "Where did Manas work as a Technical Intern?",
+    "Is Manas president of any club?",
 ]
-
-all_ok = True
-for q, want_source, want_cat in checks:
+for q in queries:
     hits = r.retrieve(q, k=3)
-    print(f"\nQ: {q}")
-    ok = bool(hits)
-    matched = False
+    print("Q:", q)
     for h in hits:
         md = h.metadata
         if md["source"] == "linkedin":
-            label = f"linkedin[{md['file']} / {md['category']} rows {md['row_start']}-{md['row_end']}]"
+            label = f"linkedin[{md['file']}/{md['category']}]"
         elif md["source"] == "github":
-            label = f"github[{md.get('repo')} / {md.get('section') or '(intro)'}]"
+            label = f"github[{md.get('repo')}]"
         else:
-            label = f"{md['source']} / {md.get('section') or ''}"
-        snippet = " ".join(h.text.split())[:85]
-        print(f"  {h.score:.3f} [{label}] {snippet}")
-        if (want_source and md["source"] == want_source
-                and (want_cat is None or md.get("category") == want_cat)):
-            matched = True
-    if want_source:
-        ok &= matched
-        if not matched:
-            print("  !! expected a", want_source, "hit in top-3")
-    all_ok &= ok
-    assert ok, f"failed: {q}"
-
-print("\nALL LINKEDIN RETRIEVAL CHECKS PASSED")
+            label = f"{md['source']}/{md.get('section', '')}"
+        print("  %.3f [%s] %s" % (h.score, label, " ".join(h.text.split())[:70]))
