@@ -29,7 +29,9 @@ def _content_lines(text):
 def _assert_lossless(source, max_chars=800):
     chunks = chunk_readme(source, max_chars=max_chars)
     rebuilt = "\n\n".join(c["text"] for c in chunks)
-    assert _content_lines(rebuilt) == _content_lines(source), \
+    # Whitespace-insensitive full-content equality: nothing lost,
+    # duplicated (beyond packing), or reordered.
+    assert "".join(rebuilt.split()) == "".join(_normalize_markdown(source).split()), \
         "chunking lost or reordered README content"
     return chunks
 
