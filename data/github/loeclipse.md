@@ -1,22 +1,3 @@
-Repository: loeclipse
-
-Description:
-Eclipse plugin for LibreOffice Extension Development
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/loeclipse
-
-README:
-
 # LOEclipse
 
 ## Introduction

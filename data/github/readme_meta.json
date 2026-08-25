@@ -348,5 +348,105 @@
     "size_bytes": 4697,
     "sha256": "9ccc3960fab17dae5142981196ed94e3a07d7cd5065bef72300854e9522f5739",
     "fetched_at": "2026-08-25T13:29:58.886906+00:00"
+  },
+  "Java": {
+    "repo": "Java",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Java/blob/master/README.md",
+    "github_sha": "d60d5104c38556422c58b3ce44d49f19e9d1826b",
+    "size_bytes": 1292,
+    "sha256": "0290e1b85769b97a445b8992f67570ea9c1ecce58ee5e48070d343f33fd53caa",
+    "fetched_at": "2026-08-25T13:30:06.145590+00:00"
+  },
+  "java-spring-template": {
+    "repo": "java-spring-template",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/java-spring-template/blob/master/README.md",
+    "github_sha": "18b2eba7fa672def7d46717f6961371d17129a5d",
+    "size_bytes": 12241,
+    "sha256": "70142616578a9c46bda4cbfe16982d76f45667ab226355d311a50e19741cddfd",
+    "fetched_at": "2026-08-25T13:30:07.306937+00:00"
+  },
+  "jenkins": {
+    "repo": "jenkins",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/jenkins/blob/master/README.md",
+    "github_sha": "5a4524d6ec76021d49411068bc2fa47e31f7dac1",
+    "size_bytes": 3915,
+    "sha256": "173010f203f9bc6f02231d0ec43fa7170dbb906f69c9b8fa17eba369e77be53b",
+    "fetched_at": "2026-08-25T13:30:07.928928+00:00"
+  },
+  "JImageHash": {
+    "repo": "JImageHash",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/JImageHash/blob/master/README.md",
+    "github_sha": "d38bd7eedc7aca6bc7f65a665bb7ff1c98d636de",
+    "size_bytes": 13598,
+    "sha256": "874262c4c628a2dc444a460669877ae3c0eb050fa12d655d8dc8b4fa5df51a8a",
+    "fetched_at": "2026-08-25T13:30:08.458237+00:00"
+  },
+  "jpf-core": {
+    "repo": "jpf-core",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/jpf-core/blob/master/README.md",
+    "github_sha": "647d3e7a106d47601b11329cd11b3fd14f253933",
+    "size_bytes": 1298,
+    "sha256": "c91d195a80849e23025c6f3f938c81c41108a7da5a31063da3e2bb2b9189b3b0",
+    "fetched_at": "2026-08-25T13:30:09.386456+00:00"
+  },
+  "juspay-sdk-integration-demo": {
+    "repo": "juspay-sdk-integration-demo",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/juspay-sdk-integration-demo/blob/master/README.md",
+    "github_sha": "4c7f563a5e163982f455a3da60c7621eade4ddf4",
+    "size_bytes": 2565,
+    "sha256": "20639e82aae273bb1ad187d306df0271c765f2e502d8fdbd90aa8289ca3f484c",
+    "fetched_at": "2026-08-25T13:30:10.481632+00:00"
+  },
+  "Knowledge_Search_Engine": {
+    "repo": "Knowledge_Search_Engine",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Knowledge_Search_Engine/blob/main/README.md",
+    "github_sha": "2bf3c23491dd3fc8a313dc5bf6f6e54a44b799fb",
+    "size_bytes": 6785,
+    "sha256": "960be816f69462a67d09e6bf6c537ce8f9e1011de23ae5f190eb181524ad2cf1",
+    "fetched_at": "2026-08-25T13:30:12.126281+00:00"
+  },
+  "L4SBOA": {
+    "repo": "L4SBOA",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/L4SBOA/blob/main/README.md",
+    "github_sha": "5fef5865c19d8f0bf9b34a35eefecfbda4ae167a",
+    "size_bytes": 3615,
+    "sha256": "4594ba76ada001b928e3c533650999035591bcd1cc7d52542a9496c612851693",
+    "fetched_at": "2026-08-25T13:30:12.730213+00:00"
+  },
+  "Learning-Git": {
+    "repo": "Learning-Git",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Learning-Git/blob/main/README.md",
+    "github_sha": "937299d17d5bbbabaf93d31b9ed2354f9ea36a7a",
+    "size_bytes": 77,
+    "sha256": "85134e09a02fd8e2276f26cd9141de87c709118cc45ed2140cb83fd50e4005fb",
+    "fetched_at": "2026-08-25T13:30:13.270694+00:00"
+  },
+  "loeclipse": {
+    "repo": "loeclipse",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/loeclipse/blob/master/README.md",
+    "github_sha": "48234cb2564814fae8a0c1038eb799b9ca6b51a7",
+    "size_bytes": 3158,
+    "sha256": "83c7394be7fc4fa469d7461ef3296ea174cdcc4a981fc567a50a16b01cd84dec",
+    "fetched_at": "2026-08-25T13:30:15.467736+00:00"
   }
 }

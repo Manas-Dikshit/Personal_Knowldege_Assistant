@@ -1,22 +1,3 @@
-Repository: java-spring-template
-
-Description:
-Java Spring template for the AsyncAPI Generator
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/java-spring-template
-
-README:
-
 ![AsyncAPI Java Spring Template](assets/github-repobanner-javaspringtemp.png)
 
 Java Spring template for the [AsyncAPI Generator](https://github.com/asyncapi/generator).

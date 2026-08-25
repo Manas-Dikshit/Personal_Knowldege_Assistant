@@ -1,22 +1,3 @@
-Repository: JImageHash
-
-Description:
-Perceptual image hashing library used to match similar images
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/JImageHash
-
-README:
-
 <img align=left src = "https://user-images.githubusercontent.com/9025925/48595271-388ba280-e954-11e8-8bc6-8b8afe108682.png" />
 
 # JImageHash

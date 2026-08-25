@@ -1,22 +1,3 @@
-Repository: jenkins
-
-Description:
-Jenkins automation server
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/jenkins
-
-README:
-
 <a href="https://jenkins.io">
     <img width="400" src="https://www.jenkins.io/images/jenkins-logo-title-dark.svg" alt="Jenkins logo"> 
 </a>

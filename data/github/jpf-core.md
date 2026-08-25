@@ -1,22 +1,3 @@
-Repository: jpf-core
-
-Description:
-JPF is an extensible software analysis framework for Java bytecode. jpf-core is the basis for all JPF projects; you always need to install it. It contains the basic VM and model checking infrastructure, and can be used to check for concurrency defects like deadlocks, and unhandled exceptions like NullPointerExceptions and AssertionErrors.
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/jpf-core
-
-README:
-
 # Java PathFinder
 
 An extensible software model checking framework for Java bytecode programs

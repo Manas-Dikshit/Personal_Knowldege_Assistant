@@ -1,22 +1,3 @@
-Repository: Java
-
-Description:
-All Algorithms implemented in Java
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/Java
-
-README:
-
 # The Algorithms - Java
 
 [![Build](https://github.com/TheAlgorithms/Java/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/TheAlgorithms/Java/actions/workflows/build.yml)

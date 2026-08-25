@@ -1,22 +1,3 @@
-Repository: juspay-sdk-integration-demo
-
-Description:
-Integration examples for Juspay SDKs
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/juspay-sdk-integration-demo
-
-README:
-
 # How to use this repo#
 
 ### What is this repository for? ###
