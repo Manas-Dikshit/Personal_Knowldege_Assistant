@@ -528,5 +528,75 @@
     "size_bytes": 3447,
     "sha256": "85c741d05991a0a82f6e1130116a8de54524987d188e292eab42ed2f84d2bf27",
     "fetched_at": "2026-08-25T13:30:20.115134+00:00"
+  },
+  "maven-compiler-plugin": {
+    "repo": "maven-compiler-plugin",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/maven-compiler-plugin/blob/master/README.md",
+    "github_sha": "b9ae9e850a2723c0238ca07e9baec0098f14c5f3",
+    "size_bytes": 5545,
+    "sha256": "4e5302c7f440a8f8505167152ff7ecb56081b6616d93e699e86bf186cad58d93",
+    "fetched_at": "2026-08-25T13:30:20.725466+00:00"
+  },
+  "maven-site": {
+    "repo": "maven-site",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/maven-site/blob/master/README.md",
+    "github_sha": "6764fcbc66c6f23b704566ffca988ba3cdacdd2d",
+    "size_bytes": 2478,
+    "sha256": "39035d9692f46260af6677bd9559bfe8c6e8ba03745bd28ad24f4f9ca8a32ac5",
+    "fetched_at": "2026-08-25T13:30:21.454551+00:00"
+  },
+  "Medi-Detail": {
+    "repo": "Medi-Detail",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Medi-Detail/blob/main/README.md",
+    "github_sha": "c293a1719c5336acd51d7caf1c2e95cf1787db28",
+    "size_bytes": 4002,
+    "sha256": "e7b2d5e354008513c78385304b6735925d4fb34f59be3410d123aa8584936f36",
+    "fetched_at": "2026-08-25T13:30:22.059022+00:00"
+  },
+  "Messenger_Automation": {
+    "repo": "Messenger_Automation",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Messenger_Automation/blob/main/README.md",
+    "github_sha": "4885ca8ef4d545e0016592eaec8d8733502d0720",
+    "size_bytes": 15276,
+    "sha256": "0b5fcf7a1392c227d8bcc899e4b80f6410f31c8ce7672c35715d0c39d5e504f1",
+    "fetched_at": "2026-08-25T13:30:22.669666+00:00"
+  },
+  "model-using-java": {
+    "repo": "model-using-java",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/model-using-java/blob/main/README.md",
+    "github_sha": "d1807e0b506b0a7e2fe8336cd8a70e929f569cd5",
+    "size_bytes": 5796,
+    "sha256": "ab6d1dacb1321bd9474cb9a9bcdceea9fa75a7a83291b95e41bb849b43eed42f",
+    "fetched_at": "2026-08-25T13:30:23.216658+00:00"
+  },
+  "MRD_AI_Desktop_Assistant": {
+    "repo": "MRD_AI_Desktop_Assistant",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/MRD_AI_Desktop_Assistant/blob/main/README.md",
+    "github_sha": "92cac423b3a5aa2441ed23cf172823105dbe0660",
+    "size_bytes": 2934,
+    "sha256": "ca10fc7a8a39ddc7599b68df1f823b850a38bf4cb31aca6febfb6276b8ca9e15",
+    "fetched_at": "2026-08-25T13:30:24.911192+00:00"
+  },
+  "music-education-interface-ionic": {
+    "repo": "music-education-interface-ionic",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/music-education-interface-ionic/blob/main/README.md",
+    "github_sha": "bd1e73ef2d32a5b592ff08b517d32a84233d04be",
+    "size_bytes": 952,
+    "sha256": "0b8b7a8dc0edda293f68fc0a1c2e31dc28d2537c054adb4643bcd2b561d86d4e",
+    "fetched_at": "2026-08-25T13:30:25.488368+00:00"
   }
 }
