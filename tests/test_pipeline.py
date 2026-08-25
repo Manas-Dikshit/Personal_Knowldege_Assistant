@@ -472,8 +472,7 @@ def test_linkedin_preamble_and_quoted_fields():
         '',
         'First Name,Last Name,Email Address,Company',
         'Ada,Lovelace,ada@example.com,Analytical Engines Inc',
-        'Grace,"Hopper, Rear Admiral","navy@usn.mil","""Big Co""",
-United States Fleet"',
+        'Grace,"Hopper, Rear Admiral","navy@usn.mil","""Big Co""",\nUnited States Fleet"',
     ]) + "\n")
     chunks, stats = _li_chunks(tmp)
     assert stats["records"] == 2
