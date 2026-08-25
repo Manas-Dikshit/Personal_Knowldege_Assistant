@@ -135,13 +135,6 @@ function addMessage(text, sender, sources) {
     return el;
 }
 
-const SOURCE_ICONS = {
-    github: "📦",
-    resume: "📄",
-    linkedin: "💼",
-    contributions: "🌿",
-};
-
 function addSourceBadges(messageEl, sources) {
     if (!Array.isArray(sources) || sources.length === 0) return null;
 
@@ -151,13 +144,13 @@ function addSourceBadges(messageEl, sources) {
     for (const s of sources.slice(0, 4)) {
         const badge = document.createElement("span");
         badge.className = "source-badge";
-        const icon = SOURCE_ICONS[s.source] || "🔗";
-        const label = s.label ? escapeHtml(s.label) : s.source;
+        const type = escapeHtml(s.source || "source");
+        const label = s.label ? escapeHtml(s.label) : "";
         const score =
             typeof s.score === "number" && s.score > 0
                 ? ` <span class="score">${s.score.toFixed(2)}</span>`
                 : "";
-        badge.innerHTML = `${icon} ${label}${score}`;
+        badge.innerHTML = `<b>${type}</b>${label ? " · " + label : ""}${score}`;
         wrap.appendChild(badge);
     }
 
@@ -262,7 +255,7 @@ document.addEventListener("keydown", (e) => {
 /* Suggestion chips */
 document.querySelectorAll(".chip").forEach((chip) => {
     chip.addEventListener("click", () => {
-        input.value = chip.textContent.replace(/^[^\w]+\s*/, "").trim();
+        input.value = chip.textContent.trim();
         updateSendState();
         sendMessage();
     });
