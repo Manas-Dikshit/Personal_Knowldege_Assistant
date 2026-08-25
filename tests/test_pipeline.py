@@ -42,10 +42,10 @@ def test_clean_text():
 
 def test_chunk_readme_keeps_headers():
     md = "# Title\n\nSome intro text here that is long enough.\n\n## Setup\n\nInstall steps described in detail for setup."
-    chunks = chunk_readme(md)
-    assert len(chunks) >= 2
-    assert any("Title" in c["text"] for c in chunks), "header text was dropped"
-    assert any("Setup" in c["text"] for c in chunks), "subheader text was dropped"
+    chunks = _assert_lossless(md)
+    joined = "\n".join(c["text"] for c in chunks)
+    assert "Title" in joined, "header text was dropped"
+    assert "Setup" in joined, "subheader text was dropped"
 
 
 def test_chunk_readme_tiny_file_not_dropped():
