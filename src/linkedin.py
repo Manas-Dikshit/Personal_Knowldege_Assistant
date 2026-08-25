@@ -328,7 +328,7 @@ def chunk_linkedin(
     for chunk in chunks:
         key = chunk["metadata"]["file"]
         totals[key] = totals.get(key, 0) + 1
-        chunk["metadata"]["total_chunks"] = totals[key]
+        chunk["metadata"]["chunk_index"] = totals[key]
 
     for chunk in chunks:
         key = chunk["metadata"]["file"]
