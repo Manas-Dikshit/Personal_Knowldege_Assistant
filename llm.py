@@ -48,10 +48,6 @@ class MRDAI:
                 "Build it first with 'python main.py'."
             )
 
-        return self.rag_ask(question)
-
-    def rag_ask(self, question: str) -> str:
-        # Kept as a separate call site for easier mocking in tests.
         return self._rag.ask(
             question,
             k=self.top_k
