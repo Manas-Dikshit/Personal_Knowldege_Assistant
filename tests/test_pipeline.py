@@ -241,24 +241,65 @@ def test_fetch_readme_truncated_then_retry(tmp_path=None):
     import tempfile
     from pathlib import Path as P
     _tmp_fetch_env(P(tempfile.mkdtemp()))
-    full = _api_readme_payload("# Title\n\n" + "content line\n" * 200)
+    body = "# Title\n\n" + "content line\n" * 200
+    full = _api_readme_payload(body)
 
     calls = []
     truncated = dict(full)
     truncated["content"] = _b64.b64encode(
-        full["content"][:200].encode("latin-1")).decode("ascii")
+        body.encode("utf-8")[:200]).decode("ascii")
 
     def fake_get(url, timeout):
         calls.append(url)
-        return FakeResponse(200, truncated if len(calls) == 1 else full)
+        if len(calls) == 1:
+            return FakeResponse(200, truncated)          # JSON, truncated
+        if "raw.example" in url:
+            resp = FakeResponse(200)                     # exact bytes
+            resp.content = body.encode("utf-8")
+            return resp
+        return FakeResponse(200, full)
 
     original_get = gf.session.get
-    gf.orig_get_backup = original_get
     try:
         gf.session.get = fake_get
+        gf.gf_sleep = getattr(gf, "time", None)
         fetched = gf.fetch_readme("repo")
-        assert len(calls) == 2, "truncated response was not retried"
+        assert fetched is not None, "raw fallback did not recover"
+        assert any("raw.example" in c for c in calls), \
+            "did not fall back to raw download URL"
         assert fetched["content"].endswith("content line\n")
+    finally:
+        gf.session.get = original_get
+
+
+def test_fetch_readme_utf16_fallback():
+    """Non-UTF8 (UTF-16) READMEs must be recovered via raw download."""
+    import tempfile
+    from pathlib import Path as P
+    _tmp_fetch_env(P(tempfile.mkdtemp()))
+
+    utf16_text = "# Railway Deploy Guide\n\nContent with ünïcödé.\n"
+    utf16_bytes = b"\xff\xfe" + utf16_text.encode("utf-16-le")
+
+    # GitHub's JSON endpoint reports a size that won't match the mangled
+    # base64 text, forcing the raw-bytes fallback.
+    payload = _api_readme_payload(utf16_text, raw_bytes=utf16_bytes)
+    payload["size"] = len(utf16_text)
+
+    def fake_get(url, timeout):
+        if "raw.example" in url:
+            resp = FakeResponse(200)
+            resp.content = utf16_bytes
+            return resp
+        return FakeResponse(200, payload)
+
+    original_get = gf.session.get
+    try:
+        gf.session.get = fake_get
+        fetched = gf.fetch_readme("railway-like")
+        assert fetched is not None
+        assert fetched["content"] == utf16_text, \
+            "UTF-16 content not decoded exactly"
     finally:
         gf.session.get = original_get
 
@@ -404,6 +445,7 @@ if __name__ == "__main__":
         test_fetch_readme_rst_and_case_variants,
         test_fetch_readme_missing_404,
         test_fetch_readme_truncated_then_retry,
+        test_fetch_readme_utf16_fallback,
         test_store_readme_unicode_and_stale_replacement,
         test_ingest_no_silent_loss_end_to_end,
         test_vectorstore_roundtrip,

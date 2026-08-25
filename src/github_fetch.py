@@ -357,6 +357,26 @@ def store_readme(
     return action
 
 
+def _remove_stale_local(repo_name: str, meta: Dict) -> bool:
+    """
+    Delete local README copies for a repository that no longer has one
+    (or only has an empty/invalid one). Returns True if files were removed.
+    """
+
+    removed = False
+
+    for name in (f"{repo_name}.md", f"{repo_name}_README.md"):
+        target = DATA_DIR / name
+        if target.exists():
+            target.unlink()
+            removed = True
+
+    if repo_name in meta:
+        del meta[repo_name]
+
+    return removed
+
+
 def fetch_all_readmes() -> Dict:
     """
     Refresh every repository README. Returns a summary report.
@@ -371,6 +391,7 @@ def fetch_all_readmes() -> Dict:
         "created": 0,
         "updated": 0,
         "unchanged": 0,
+        "removed_stale": 0,
         "missing_readme": [],
         "failed": [],
     }
@@ -389,6 +410,14 @@ def fetch_all_readmes() -> Dict:
 
         if fetched is None:
             stats["missing_readme"].append(repo_name)
+            meta = load_meta()
+            if _remove_stale_local(repo_name, meta):
+                stats["removed_stale"] += 1
+                META_PATH.write_text(
+                    json.dumps(meta, indent=2, ensure_ascii=False),
+                    encoding="utf-8"
+                )
+                print(f"  Removed stale local copy (no README upstream).")
             continue
 
         stats["fetched"] += 1
