@@ -1,28 +1,31 @@
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import faiss
 import numpy as np
+
+from src.config import INDEX_PATH, METADATA_PATH
 
 
 class VectorStore:
     """
     FAISS-backed vector store.
+
+    If an index already exists on disk it is loaded and its dimension
+    takes precedence; `dim` is only required when building a fresh index.
     """
 
     def __init__(
         self,
-        dim: int,
-        index_path: str = "storage/faiss_index/index.faiss",
-        metadata_path: str = "storage/faiss_index/chunks.json"
+        dim: Optional[int] = None,
+        index_path: Path = INDEX_PATH,
+        metadata_path: Path = METADATA_PATH
     ):
         self.dim = dim
 
         self.index_path = Path(index_path)
         self.metadata_path = Path(metadata_path)
-
-        self.index = faiss.IndexFlatIP(dim)
 
         # each item:
         # {
@@ -33,12 +36,20 @@ class VectorStore:
 
         if self.index_path.exists():
             self.load()
+            return
+
+        if dim is None:
+            raise ValueError(
+                "No existing index found; a 'dim' is required to create one."
+            )
+
+        self.index = faiss.IndexFlatIP(dim)
 
     def add(
         self,
         embeddings: np.ndarray,
         texts: List[str],
-        metadata: List[Dict] | None = None
+        metadata: Optional[List[Dict]] = None
     ) -> None:
         """
         Add vectors and corresponding chunks.
@@ -48,6 +59,18 @@ class VectorStore:
             embeddings,
             dtype=np.float32
         )
+
+        if len(texts) != len(embeddings):
+            raise ValueError(
+                f"texts ({len(texts)}) and embeddings "
+                f"({len(embeddings)}) length mismatch."
+            )
+
+        if self.index.d != embeddings.shape[1]:
+            raise ValueError(
+                f"Embedding dim {embeddings.shape[1]} does not match "
+                f"index dim {self.index.d}."
+            )
 
         if len(embeddings) == 0:
             return
@@ -78,10 +101,18 @@ class VectorStore:
         if self.index.ntotal == 0:
             return []
 
+        k = max(1, min(k, self.index.ntotal))
+
         query_embedding = np.asarray(
             query_embedding,
             dtype=np.float32
-        )
+        ).reshape(1, -1)
+
+        if query_embedding.shape[1] != self.index.d:
+            raise ValueError(
+                f"Query dim {query_embedding.shape[1]} does not match "
+                f"index dim {self.index.d}."
+            )
 
         scores, indices = self.index.search(
             query_embedding,
@@ -95,10 +126,7 @@ class VectorStore:
             indices[0]
         ):
 
-            if idx < 0:
-                continue
-
-            if idx >= len(self.documents):
+            if idx < 0 or idx >= len(self.documents):
                 continue
 
             doc = self.documents[idx]
@@ -119,6 +147,10 @@ class VectorStore:
         """
 
         self.index_path.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+        self.metadata_path.parent.mkdir(
             parents=True,
             exist_ok=True
         )
@@ -143,12 +175,15 @@ class VectorStore:
 
     def load(self) -> None:
         """
-        Load index and metadata.
+        Load index and metadata. The stored index's dim wins over any
+        passed-in value so stale callers can't corrupt the store.
         """
 
         self.index = faiss.read_index(
             str(self.index_path)
         )
+
+        self.dim = int(self.index.d)
 
         if self.metadata_path.exists():
 
@@ -159,6 +194,14 @@ class VectorStore:
             ) as f:
 
                 self.documents = json.load(f)
+
+            # Index and metadata must stay in sync.
+            if len(self.documents) != self.index.ntotal:
+                raise RuntimeError(
+                    f"Corrupted index: {self.index.ntotal} vectors but "
+                    f"{len(self.documents)} documents. Rebuild with "
+                    "'python main.py'."
+                )
 
         else:
             self.documents = []
