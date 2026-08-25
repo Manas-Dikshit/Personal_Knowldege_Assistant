@@ -133,7 +133,202 @@ def test_chunk_resume_sections():
     )
     chunks = chunk_resume(resume)
     assert len(chunks) == 1  # both sections pack under the buffer limit
-    assert "Summary" in chunks[0] and "Education" in chunks[0]
+    assert "Summary" in chunks[0]["text"] and "Education" in chunks[0]["text"]
+    assert chunks[0]["section"] in ("Summary", "Education")
+
+
+def test_chunk_resume_lossless_short_lines_kept():
+    # Single-line items and short sections must survive chunking.
+    resume = "\n".join([
+        "Manas Ranjan Dikshit",
+        "manas@example.com | +91-0000000000",
+        "",
+        "Education",
+        "B.Tech CSE, SUIIT 2024-2028, CGPA 9/10",
+        "",
+        "Achievements",
+        "Hackathon winner",
+        "",
+        "Certifications",
+        "AWS Cloud Practitioner",
+    ])
+    chunks = chunk_resume(resume)
+    rebuilt = "\n\n".join(c["text"] for c in chunks)
+    for needle in (
+        "manas@example.com", "CGPA 9/10", "Hackathon winner",
+        "AWS Cloud Practitioner", "Achievements", "Certifications"
+    ):
+        assert needle in rebuilt, f"resume content lost: {needle}"
+    sections = {c["section"] for c in chunks}
+    assert {"Education", "Achievements", "Certifications"} <= sections
+
+
+# --------------------------------------------------------------------
+# github_fetch (mocked HTTP session — no network access)
+# --------------------------------------------------------------------
+
+import base64 as _b64
+import json as _json
+
+from src import github_fetch as gf
+
+
+class FakeResponse:
+    def __init__(self, status_code=200, payload=None, headers=None):
+        self.status_code = status_code
+        self._payload = payload if payload is not None else {}
+        self.headers = headers or {}
+
+    def json(self):
+        return self._payload
+
+
+def _api_readme_payload(content, name="README.md", size=None, path="README.md"):
+    raw = content.encode("utf-8")
+    return {
+        "name": name,
+        "path": path,
+        "sha": "abc123",
+        "size": len(raw) if size is None else size,
+        "html_url": f"https://github.com/u/repo/blob/main/{path}",
+        "content": _b64.b64encode(raw).decode("ascii"),
+        "encoding": "base64",
+    }
+
+
+def _tmp_fetch_env(monkeypatch_tmpdir):
+    gf.DATA_DIR = monkeypatch_tmpdir
+    gf.META_PATH = monkeypatch_tmpdir / "readme_meta.json"
+    gf.REPOS_PATH = monkeypatch_tmpdir / "repos.json"
+
+
+def test_fetch_readme_rst_and_case_variants(tmp_path=None):
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _tmp_fetch_env(tmp)
+
+    # GitHub's /readme endpoint resolves any variant; we just handle it.
+    original_get = gf.session.get
+    try:
+        gf.session.get = lambda url, timeout: FakeResponse(
+            200, _api_readme_payload("Doc\n====\nRST body text here.",
+                                     name="README.rst", path="README.rst"))
+        fetched = gf.fetch_readme("repo")
+        assert fetched["readme_type"] == "rst"
+        assert fetched["content"].endswith("RST body text here.")
+    finally:
+        gf.session.get = original_get
+
+
+def test_fetch_readme_missing_404(tmp_path=None):
+    import tempfile
+    from pathlib import Path as P
+    _tmp_fetch_env(P(tempfile.mkdtemp()))
+    original_get = gf.session.get
+    try:
+        gf.session.get = lambda url, timeout: FakeResponse(404, {"message": "Not Found"})
+        assert gf.fetch_readme("empty-repo") is None
+    finally:
+        gf.session.get = original_get
+
+
+def test_fetch_readme_truncated_then_retry(tmp_path=None):
+    import tempfile
+    from pathlib import Path as P
+    _tmp_fetch_env(P(tempfile.mkdtemp()))
+    full = _api_readme_payload("# Title\n\n" + "content line\n" * 200)
+
+    calls = []
+    truncated = dict(full)
+    truncated["content"] = _b64.b64encode(
+        full["content"][:200].encode("latin-1")).decode("ascii")
+
+    def fake_get(url, timeout):
+        calls.append(url)
+        return FakeResponse(200, truncated if len(calls) == 1 else full)
+
+    original_get = gf.session.get
+    gf.orig_get_backup = original_get
+    try:
+        gf.session.get = fake_get
+        fetched = gf.fetch_readme("repo")
+        assert len(calls) == 2, "truncated response was not retried"
+        assert fetched["content"].endswith("content line\n")
+    finally:
+        gf.session.get = original_get
+
+
+def test_store_readme_unicode_and_stale_replacement():
+    import hashlib
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _tmp_fetch_env(tmp)
+
+    doc = "# Ünïcødé ✓ 日本語 README\n\n| 表 | 列 |\n|----|----|\n| a | b |\n"
+    fetched = {
+        "content": doc,
+        "path": "README.md",
+        "name": "README.md",
+        "html_url": "https://github.com/u/repo/blob/main/README.md",
+        "github_sha": "deadbeef",
+        "size_bytes": len(doc.encode("utf-8")),
+        "readme_type": "md",
+    }
+
+    assert gf.store_readme("uni-repo", fetched) == "created"
+
+    stored = (gf.DATA_DIR / "uni-repo.md").read_text(encoding="utf-8")
+    assert stored == doc, "stored README differs byte-for-byte"
+
+    meta = gf.load_meta()["uni-repo"]
+    assert meta["sha256"] == hashlib.sha256(doc.encode()).hexdigest()
+    assert meta["source_url"].startswith("https://github.com/")
+    assert meta["fetched_at"]
+
+    # Unchanged content -> no rewrite.
+    assert gf.store_readme("uni-repo", fetched) == "unchanged"
+
+    # Stale local file (different content) -> replaced.
+    stale = dict(fetched)
+    stale["content"] = doc.replace("日本語", "updated")
+    assert gf.store_readme("uni-repo", stale) == "updated"
+    assert "updated" in (gf.DATA_DIR / "uni-repo.md").read_text(encoding="utf-8")
+
+
+def test_ingest_no_silent_loss_end_to_end(tmp_path=None):
+    """Stored raw README -> ingestion -> chunks covers all content."""
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+
+    readme = (
+        "# Repo\n\nIntro with [link](https://x.y).\n\n## Code\n\n"
+        "```py\n# hash inside fence\nprint('hi')\n```\n\n"
+        "| A | B |\n|---|---|\n| 1 | 2 |\n\nTiny.\n"
+    )
+    (tmp / "Repo.md").write_text(readme, encoding="utf-8")
+    (tmp / "readme_meta.json").write_text(_json.dumps({
+        "Repo": {
+            "source_url": "https://github.com/u/Repo/blob/main/README.md",
+            "fetched_at": "2026-01-01T00:00:00+00:00",
+            "sha256": "x",
+            "readme_type": "md",
+            "path": "README.md",
+        }
+    }), encoding="utf-8")
+
+    docs = __import__("src.ingest", fromlist=["load_markdown_files"]) \
+        .load_markdown_files(str(tmp))
+    assert len(docs) == 1
+    d = docs[0]
+    assert "".join(d["text"].split()) == "".join(readme.split()), \
+        "ingestion altered stored README"
+    assert d["source_url"].endswith("README.md") and d["readme_type"] == "md"
+
+    chunks = _assert_lossless(readme)
+    assert chunks[0]["section"] == "Repo"
 
 
 def test_vectorstore_roundtrip(tmp_path=None):
