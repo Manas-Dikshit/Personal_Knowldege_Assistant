@@ -4,7 +4,8 @@ from typing import Dict, List
 
 from pypdf import PdfReader
 
-from src.config import GITHUB_DIR, RESUME_PATH
+from src.config import GITHUB_DIR, LINKEDIN_DIR, RESUME_PATH
+from src.linkedin import chunk_linkedin as load_linkedin_data
 
 
 # ---------------------------------------------------------------------
