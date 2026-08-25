@@ -44,8 +44,84 @@ def test_chunk_readme_keeps_headers():
     md = "# Title\n\nSome intro text here that is long enough.\n\n## Setup\n\nInstall steps described in detail for setup."
     chunks = chunk_readme(md)
     assert len(chunks) >= 2
-    assert any("Title" in c for c in chunks), "header text was dropped"
-    assert any("Setup" in c for c in chunks), "subheader text was dropped"
+    assert any("Title" in c["text"] for c in chunks), "header text was dropped"
+    assert any("Setup" in c["text"] for c in chunks), "subheader text was dropped"
+
+
+def test_chunk_readme_tiny_file_not_dropped():
+    # Regression: a one-line README was previously discarded entirely
+    # by the old '<50 chars' section filter.
+    chunks = _assert_lossless("# E-cell")
+    assert len(chunks) == 1 and "E-cell" in chunks[0]["text"]
+    assert chunks[0]["section"] == "E-cell"
+
+
+def test_chunk_readme_lossless_full_featured():
+    md = "\n".join([
+        "# Project",
+        "",
+        "Intro paragraph with [a link](https://example.com) and **bold**.",
+        "",
+        "## Features",
+        "",
+        "- list item one",
+        "- list item two",
+        "  - nested item",
+        "",
+        "### Code",
+        "",
+        "```python",
+        "# not a heading, even at line start",
+        "def f():",
+        "    return '```'",
+        "```",
+        "",
+        "## Table",
+        "",
+        "| Col A | Col B |",
+        "|-------|-------|",
+        "| 1     | 2     |",
+        "",
+        "License",
+        "",
+        "MIT",
+    ])
+    chunks = _assert_lossless(md)
+    sections = {c["section"] for c in chunks}
+    assert "Code" in sections and "Table" in sections
+
+
+def test_chunk_readme_code_fence_hash_not_heading():
+    # '#' inside a fence must not start a new section or break the block.
+    md = "# Guide\n\n```bash\n# this is a shell comment\npip install x\n```"
+    chunks = _assert_lossless(md)
+    assert len(chunks) == 1
+    fence = [c for c in chunks if "shell comment" in c["text"]][0]
+    assert fence["section"] == "Guide"
+    assert fence["text"].count("```") == 2, "code fence was split open"
+
+
+def test_chunk_readme_small_sections_packed_not_dropped():
+    md = "# A\n\nshort\n\n# B\n\nalso short\n\n# C\n\ntiny"
+    chunks = _assert_lossless(md)
+    joined = "\n".join(c["text"] for c in chunks)
+    assert all(h in joined for h in ("# A", "# B", "# C"))
+
+
+def test_chunk_readme_oversize_hard_split_no_loss():
+    para = "word " * 400  # single paragraph > max_chars
+    md = f"# Big\n\n{para.strip()}"
+    chunks = _assert_lossless(md, max_chars=800)
+    assert all(len(c["text"]) <= 900 for c in chunks)
+    assert len(chunks) > 1
+
+
+def test_chunk_readme_single_long_line():
+    line = "x" * 3000
+    md = f"# T\n\n{line}"
+    chunks = _assert_lossless(md, max_chars=800)
+    rebuilt = "".join(c["text"] for c in chunks)
+    assert "x" * 3000 in rebuilt.replace("\n\n", "").replace("\n", "")
 
 
 def test_chunk_resume_sections():
