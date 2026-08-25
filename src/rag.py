@@ -1,5 +1,8 @@
-from typing import List, Optional
+from typing import List
+
 import requests
+
+from src.config import LLM_MODEL, OLLAMA_URL
 
 
 SYSTEM_PROMPT = """
@@ -26,9 +29,12 @@ class RAG:
     def __init__(
         self,
         retriever,
-        model: str = "llama3",
-        ollama_url: str = "http://localhost:11434/api/generate"
+        model: str = LLM_MODEL,
+        ollama_url: str = OLLAMA_URL
     ):
+        if retriever is None:
+            raise ValueError("RAG requires a retriever.")
+
         self.retriever = retriever
         self.model = model
         self.ollama_url = ollama_url
@@ -61,7 +67,11 @@ class RAG:
         Build the final prompt.
         """
 
-        context = "\n\n".join(contexts)
+        context = (
+            "\n\n".join(contexts)
+            if contexts
+            else "(No relevant information was retrieved.)"
+        )
 
         return f"""
 {SYSTEM_PROMPT}
@@ -103,6 +113,9 @@ ANSWER:
         Retrieve context and generate response.
         """
 
+        if not question or not question.strip():
+            return "Please provide a question."
+
         contexts = self.retrieve_context(
             question,
             k=k
@@ -132,17 +145,26 @@ ANSWER:
 
             data = response.json()
 
-            return data.get(
-                "response",
-                "No response generated."
-            ).strip()
+        except requests.ConnectionError:
+            return (
+                "Unable to reach Ollama. Is it running? "
+                "Start it with 'ollama serve' and pull the model with "
+                f"'ollama pull {self.model}'."
+            )
 
         except requests.RequestException as exc:
+            return f"Unable to generate a response ({exc})."
 
-            return (
-                "Unable to generate a response "
-                f"({exc})."
-            )
+        except ValueError:
+            # response.json() failed to decode
+            return "Ollama returned an invalid response."
+
+        answer = data.get("response", "").strip()
+
+        if not answer:
+            return "No response generated."
+
+        return answer
 
     def ask(
         self,
