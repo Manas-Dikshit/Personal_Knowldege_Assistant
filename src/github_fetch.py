@@ -1,23 +1,24 @@
 from pathlib import Path
 import base64
+import os
+
 import requests
 from typing import List, Dict, Optional
 
 
 GITHUB_USERNAME = "Manas-Dikshit"
-OUTPUT_DIR = Path("data/github")
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "github"
 
-# Optional token to increase rate limits
-GITHUB_TOKEN = None
-
+# Optional token to increase rate limits (set GITHUB_TOKEN env var).
 BASE_URL = "https://api.github.com"
-
 
 session = requests.Session()
 
 headers = {
     "Accept": "application/vnd.github+json"
 }
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 if GITHUB_TOKEN:
     headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
