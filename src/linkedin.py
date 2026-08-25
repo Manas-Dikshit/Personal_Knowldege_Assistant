@@ -213,6 +213,12 @@ def load_linkedin_records(folder) -> Tuple[List[Dict], Dict]:
             )
             continue
 
+        if not rows:
+            stats["skipped"].append(
+                {"file": path.name, "reason": "no data rows"}
+            )
+            continue
+
         rel_path = str(path)
 
         for row_number, values in rows:

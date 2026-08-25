@@ -508,6 +508,7 @@ def test_linkedin_malformed_file_does_not_block_others():
     from pathlib import Path as P
     tmp = P(tempfile.mkdtemp())
     _write_csv(tmp / "Skills.csv", "Name\nPython\nDocker\n")
+    _write_csv(tmp / "Broken.csv", "garbage")  # must exist to be discovered
 
     # Force the failure path: parse_csv raises for exactly one file.
     from src import linkedin as li
@@ -624,6 +625,7 @@ if __name__ == "__main__":
         test_linkedin_preamble_and_quoted_fields,
         test_linkedin_empty_fields_and_rows_kept_meaningful,
         test_linkedin_malformed_file_does_not_block_others,
+        test_linkedin_ragged_rows_tolerated,
         test_linkedin_duplicate_records_deduped_across_files,
         test_linkedin_header_only_file_skipped,
         test_linkedin_chunk_metadata_integrity,
