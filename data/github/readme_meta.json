@@ -1018,5 +1018,35 @@
     "size_bytes": 12918,
     "sha256": "ef75ca2cdce480274192837b0318305e49f0a1acfeefe0bdd9256070be55598d",
     "fetched_at": "2026-08-25T13:34:34.622898+00:00"
+  },
+  "face-authentication": {
+    "repo": "face-authentication",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/face-authentication/blob/main/README.md",
+    "github_sha": "66c1401fe72a89672e0061480b017bbc37a6897b",
+    "size_bytes": 7084,
+    "sha256": "20dd81909034b62507bed48da5066d59b2590d329541970bc8bf7a5f48c7033d",
+    "fetched_at": "2026-08-25T13:34:40.013332+00:00"
+  },
+  "Internship-AI-Agent": {
+    "repo": "Internship-AI-Agent",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Internship-AI-Agent/blob/main/README.md",
+    "github_sha": "789b69744695edafaae3b1c53ce0a16ae7bb2d91",
+    "size_bytes": 8678,
+    "sha256": "be21cc84591a71be75082dcc97e1fae9ca2c2abaadbab495e3d21b1c7bc8f7af",
+    "fetched_at": "2026-08-25T13:34:47.071356+00:00"
+  },
+  "Learning_Integration_Of_AI_Models": {
+    "repo": "Learning_Integration_Of_AI_Models",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Learning_Integration_Of_AI_Models/blob/main/README.md",
+    "github_sha": "1c10023f0c50cd6dbd265dc9e93771d6ece176a7",
+    "size_bytes": 76,
+    "sha256": "fa753ed90ec9336c9299e62448c2fdd35d32c9d393da6e2080d8077ce92c7d96",
+    "fetched_at": "2026-08-25T13:34:54.637404+00:00"
   }
 }
