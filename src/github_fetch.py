@@ -155,7 +155,8 @@ def get_repositories() -> List[Dict]:
 def _decode_readme(payload: Dict) -> Optional[str]:
     """
     Decode base64 README content from the API payload.
-    Returns None when the content is unusable.
+    Returns None when the content is unusable or was corrupted by
+    GitHub's sanitization (replacement chars present).
     """
 
     encoded = payload.get("content")
@@ -166,11 +167,52 @@ def _decode_readme(payload: Dict) -> Optional[str]:
     raw = base64.b64decode(encoded)
 
     try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # Non-UTF8 file (UTF-16, latin-1, ...): the JSON endpoint already
+        # mangled it; caller must re-fetch raw bytes instead.
+        return None
+
+    if "\ufffd" in text:
+        return None
+
+    return text
+
+
+def _fetch_raw_bytes(download_url: str) -> Optional[bytes]:
+    """
+    Fetch the exact file bytes from the raw download URL.
+    """
+
+    if not download_url:
+        return None
+
+    response = api_get(download_url)
+
+    if response.status_code != 200:
+        return None
+
+    return response.content
+
+
+def _decode_bytes(raw: bytes) -> str:
+    """
+    Decode file bytes to text, handling UTF-8, UTF-16 (BOM) and finally
+    a lossy latin-1 fallback so nothing silently disappears.
+    """
+
+    try:
         return raw.decode("utf-8")
     except UnicodeDecodeError:
-        # Non-UTF8 bytes: preserve everything readable instead of failing.
-        print(f"Warning: non-UTF8 bytes in README, replacing invalid chars.")
-        return raw.decode("utf-8", errors="replace")
+        pass
+
+    try:
+        return raw.decode("utf-16")
+    except UnicodeDecodeError:
+        pass
+
+    print("Warning: unknown encoding; falling back to lossy latin-1.")
+    return raw.decode("latin-1")
 
 
 def fetch_readme(repo_name: str) -> Optional[Dict]:
@@ -206,16 +248,34 @@ def fetch_readme(repo_name: str) -> Optional[Dict]:
 
         reported_size = payload.get("size", -1)
 
+        if content is None or (
+            reported_size >= 0
+            and len(content.encode("utf-8")) != reported_size
+        ):
+            # JSON endpoint unusable (non-UTF8 file) or response looks
+            # truncated: fetch exact bytes from the raw download URL.
+            raw = _fetch_raw_bytes(payload.get("download_url", ""))
+
+            if raw is None:
+                print(f"  Warning: could not fetch raw README for "
+                      f"{repo_name}.")
+                if content is None:
+                    content = None  # keep None -> handled below
+            else:
+                if len(raw) < max(reported_size, 0):
+                    print(f"  Truncated raw response ({len(raw)} < "
+                          f"{reported_size} bytes); retrying "
+                          f"({attempt}/{MAX_RETRIES})...")
+                    continue
+
+                content = _decode_bytes(raw)
+
         if content is None:
             print(f"  Warning: unreadable README payload for {repo_name}.")
         elif len(content.strip()) < MIN_README_CHARS:
             print(f"  Warning: README for {repo_name} suspiciously short "
                   f"({len(content)} chars); treating as missing.")
             return None
-        elif reported_size >= 0 and len(content.encode("utf-8")) != reported_size:
-            # Truncated/partial response: retry.
-            print(f"  Truncated response ({len(content)} != {reported_size} "
-                  f"bytes); retrying ({attempt}/{MAX_RETRIES})...")
         else:
             return {
                 "content": content,
