@@ -163,25 +163,31 @@ def load_text_files(
 
 def load_all_data() -> Dict:
     """
-    Load all knowledge sources.
+    Load all knowledge sources. Missing optional sources are skipped
+    with a warning instead of crashing the pipeline.
     """
 
-    resume_path = "data/resume/resume.pdf"
-    github_folder = "data/github"
-
-    resume_text = load_resume(
-        resume_path
-    )
+    try:
+        resume_text = load_resume(RESUME_PATH)
+    except FileNotFoundError as exc:
+        print(f"Warning: {exc}. Continuing without resume.")
+        resume_text = ""
 
     github_documents = load_markdown_files(
-        github_folder
+        GITHUB_DIR
     )
 
     contribution_text = (
         load_contribution_history(
-            github_folder
+            GITHUB_DIR
         )
     )
+
+    if not resume_text and not github_documents and not contribution_text:
+        raise RuntimeError(
+            "No knowledge sources found in data/. Run "
+            "'python src/github_fetch.py' or add a resume first."
+        )
 
     return {
         "resume": {
