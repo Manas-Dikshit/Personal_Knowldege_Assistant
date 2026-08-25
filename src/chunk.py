@@ -153,11 +153,10 @@ def chunk_markdown(
     """
     Chunk markdown losslessly.
 
-    Returns [{"text": ..., "section": ...}, ...] such that the chunks
-    collectively contain the complete original content (every non-blank
-    source line appears exactly once, in order). Small sections are packed
-    together instead of being dropped; oversized blocks are split at line
-    boundaries.
+    Each chunk contains blocks from exactly one section so the
+    'section' attribution stays accurate. Small sections are kept
+    (packed with their own section), oversized blocks are split at line
+    boundaries. Nothing is discarded.
     """
 
     normalized = _normalize_markdown(text)
@@ -181,7 +180,11 @@ def chunk_markdown(
 
         for piece in pieces:
 
-            if current_lines and current_len + 2 + len(piece) > max_chars:
+            # Never mix sections inside one chunk.
+            if current_lines and (
+                current_len + 2 + len(piece) > max_chars
+                or block["section"] != current_section
+            ):
                 chunks.append(
                     {
                         "text": "\n\n".join(current_lines),
