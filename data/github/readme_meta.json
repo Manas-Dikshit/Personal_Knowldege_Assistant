@@ -218,5 +218,55 @@
     "size_bytes": 19657,
     "sha256": "699f0711fde6b5fe5ade3dd604aea93c024115f1de788445dacfd30b29bdeb02",
     "fetched_at": "2026-08-25T13:29:44.350625+00:00"
+  },
+  "dubbo-annotation-processor": {
+    "repo": "dubbo-annotation-processor",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/dubbo-annotation-processor/blob/main/README.md",
+    "github_sha": "22c76c3c04fc35b5b4bde059a9bfb5f1dda2b0c0",
+    "size_bytes": 29,
+    "sha256": "bd1ce7abde38da4a0bced6d143649fd927fc998dfb0363644169f9cd823938ba",
+    "fetched_at": "2026-08-25T13:29:47.949990+00:00"
+  },
+  "eeg-database": {
+    "repo": "eeg-database",
+    "path": "README.textile",
+    "readme_type": "textile",
+    "source_url": "https://github.com/Manas-Dikshit/eeg-database/blob/master/README.textile",
+    "github_sha": "61d889e50af049b3d90fd32224c4d3fb136bfed1",
+    "size_bytes": 2779,
+    "sha256": "3b7c863570531cfdbb38ce865eacdd438b2ed1432ba6f13fe88124078fdfd06c",
+    "fetched_at": "2026-08-25T13:29:49.572030+00:00"
+  },
+  "Email_Validator-": {
+    "repo": "Email_Validator-",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Email_Validator-/blob/main/README.md",
+    "github_sha": "9b569b29fc010a32e0af20585fd39617b6e7bf7f",
+    "size_bytes": 6437,
+    "sha256": "8fd89a9049cfba66291fb1e527fab66aa64deb66ce23290c7c4bfade4582002d",
+    "fetched_at": "2026-08-25T13:29:50.635728+00:00"
+  },
+  "finetune-emotion": {
+    "repo": "finetune-emotion",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/finetune-emotion/blob/main/README.md",
+    "github_sha": "61df855f749ab44d0c3ef0dadf4e6fd75c0747c1",
+    "size_bytes": 236,
+    "sha256": "938a2c92c3db2ad41f5e043d91c658698ab8118b847914be526cfc88ad65cfbb",
+    "fetched_at": "2026-08-25T13:29:52.634199+00:00"
+  },
+  "Finger_Tracking": {
+    "repo": "Finger_Tracking",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Finger_Tracking/blob/main/README.md",
+    "github_sha": "23c0752c46ddd3661cf9c6890bd0e5c2e86a321d",
+    "size_bytes": 10377,
+    "sha256": "c51235e668885b107e32a3cfb9899118eeb9b169952535aabc0a1261b616dbf3",
+    "fetched_at": "2026-08-25T13:29:53.260903+00:00"
   }
 }

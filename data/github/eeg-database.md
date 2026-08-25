@@ -1,22 +1,3 @@
-Repository: eeg-database
-
-Description:
- EEG/ERP portal enables community researchers to store, update, download and search data and metadata from EEG/ERP experiments. The system is developed as a standalone product; the database access is available through a web interface.
-
-Language:
-Unknown
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/eeg-database
-
-README:
-
 h1. EEGBase
 
 h2. An database portal specialized for EEG/ERP experiments
