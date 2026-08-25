@@ -7,6 +7,7 @@ STORAGE_DIR = BASE_DIR / "storage"
 
 RESUME_PATH = DATA_DIR / "resume" / "resume.pdf"
 GITHUB_DIR = DATA_DIR / "github"
+LINKEDIN_DIR = DATA_DIR / "linkedin"
 INDEX_PATH = STORAGE_DIR / "faiss_index" / "index.faiss"
 METADATA_PATH = STORAGE_DIR / "faiss_index" / "chunks.json"
 

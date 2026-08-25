@@ -220,7 +220,20 @@ def load_all_data() -> Dict:
         )
     )
 
-    if not resume_text and not github_documents and not contribution_text:
+    linkedin_chunks, linkedin_stats = load_linkedin_data(
+        LINKEDIN_DIR
+    )
+
+    if linkedin_stats["files"]:
+        print(
+            f"LinkedIn: {linkedin_stats['records']} records from "
+            f"{linkedin_stats['files']} files "
+            f"({linkedin_stats['duplicates']} duplicates skipped, "
+            f"{len(linkedin_stats['skipped'])} files/rows skipped)."
+        )
+
+    if (not resume_text and not github_documents
+            and not contribution_text and not linkedin_chunks):
         raise RuntimeError(
             "No knowledge sources found in data/. Run "
             "'python src/github_fetch.py' or add a resume first."
@@ -237,7 +250,10 @@ def load_all_data() -> Dict:
         "contributions": {
             "source": "contributions",
             "text": contribution_text
-        }
+        },
+
+        # Already chunked by the dedicated LinkedIn module.
+        "linkedin_chunks": linkedin_chunks,
     }
 
 
