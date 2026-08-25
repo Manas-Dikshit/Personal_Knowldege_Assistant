@@ -738,5 +738,65 @@
     "size_bytes": 10039,
     "sha256": "8aee71e34a3642c4943a2831a6f8f14eab099b8159a378908b4c060b5e5eb417",
     "fetched_at": "2026-08-25T13:30:34.550495+00:00"
+  },
+  "Portfolio-Website": {
+    "repo": "Portfolio-Website",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Portfolio-Website/blob/main/README.md",
+    "github_sha": "bfd8942af909d7a0184d87929d92eae7a4e8148f",
+    "size_bytes": 2909,
+    "sha256": "a9e8c1690cd2f583107591f958981047b852a778dfc3530976f1ec9a7a961b52",
+    "fetched_at": "2026-08-25T13:30:35.573050+00:00"
+  },
+  "PROJ-JNI": {
+    "repo": "PROJ-JNI",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/PROJ-JNI/blob/main/README.md",
+    "github_sha": "90732b2cfa29157bed7cc4803368cae2cfaa2a4d",
+    "size_bytes": 1594,
+    "sha256": "dda68e527411023d041134ac7981b9f95729d42aa6484861e131ff9744fb2efb",
+    "fetched_at": "2026-08-25T13:30:36.371150+00:00"
+  },
+  "pulsar-issue-23792": {
+    "repo": "pulsar-issue-23792",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/pulsar-issue-23792/blob/main/README.md",
+    "github_sha": "d875c1ecf1beaa164e46b5f0b55a2751fcb5a480",
+    "size_bytes": 91,
+    "sha256": "2882b91d5ada59ad46e61214b27677478017042281ffcf1811cec1a5b8836ff5",
+    "fetched_at": "2026-08-25T13:30:36.925397+00:00"
+  },
+  "Python_Programming-Lab": {
+    "repo": "Python_Programming-Lab",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Python_Programming-Lab/blob/main/README.md",
+    "github_sha": "2437c458f9e5a1e70a705bc1bc52929bcf1b6c6d",
+    "size_bytes": 2552,
+    "sha256": "98c9600e41498009a153f122acd9298f70c5f74375df565039bfa813135d28c2",
+    "fetched_at": "2026-08-25T13:30:37.472850+00:00"
+  },
+  "RepoLens-AI": {
+    "repo": "RepoLens-AI",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/RepoLens-AI/blob/main/README.md",
+    "github_sha": "5ffedb596b91a728d967c265891f326c0031cb6e",
+    "size_bytes": 6113,
+    "sha256": "67f83f5d28372d96ed2665123054af66f7d33706341d76f010c4260223a51eeb",
+    "fetched_at": "2026-08-25T13:30:39.569323+00:00"
+  },
+  "resq-ai-assistant": {
+    "repo": "resq-ai-assistant",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/resq-ai-assistant/blob/main/README.md",
+    "github_sha": "4f775c7b68e9b9d91c6dc9ad206877f1faaca129",
+    "size_bytes": 26472,
+    "sha256": "3b31c4dbe9fc711b9bea671fb0132e16f229cc4627d7b3afb10dc3dd8186e5df",
+    "fetched_at": "2026-08-25T13:30:40.082867+00:00"
   }
 }
