@@ -988,5 +988,15 @@
     "size_bytes": 2153,
     "sha256": "fbd72de3f70f15ddf3da1d416661d525ed21425c0fdfc717bd9891c2a8be601b",
     "fetched_at": "2026-08-25T13:30:54.050517+00:00"
+  },
+  "zulip-js": {
+    "repo": "zulip-js",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/zulip-js/blob/main/README.md",
+    "github_sha": "5f75a3e5b5f9f67713a31a504d1db3a893ca0531",
+    "size_bytes": 9366,
+    "sha256": "fc4f0d7ca8a23606b165e97ae2c2a8ea6bbe5d84bc64ff4a5f3070ebea620f07",
+    "fetched_at": "2026-08-25T13:30:54.711224+00:00"
   }
 }
