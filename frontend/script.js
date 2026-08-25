@@ -69,7 +69,7 @@ async function sendMessage() {
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/chat",
+            API_URL,
             {
                 method: "POST",
 
@@ -82,6 +82,10 @@ async function sendMessage() {
                 })
             }
         );
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -108,6 +112,18 @@ async function sendMessage() {
     sendBtn.disabled = false;
 
 }
+
+document.querySelectorAll(".suggestion-card").forEach((card) => {
+
+    card.addEventListener("click", () => {
+
+        input.value = card.textContent.trim();
+
+        sendMessage();
+
+    });
+
+});
 
 sendBtn.addEventListener("click", sendMessage);
 
