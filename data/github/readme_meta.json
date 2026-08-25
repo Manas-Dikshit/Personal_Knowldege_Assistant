@@ -188,5 +188,35 @@
     "size_bytes": 9968,
     "sha256": "c4c06c26c67755b43687960cd79766cfbfc610e753ae0e5bc14a03664fba2788",
     "fetched_at": "2026-08-25T13:29:40.997128+00:00"
+  },
+  "crAPI": {
+    "repo": "crAPI",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/crAPI/blob/develop/README.md",
+    "github_sha": "94be9f51a0b3a2991a6301275fa339363f37c60f",
+    "size_bytes": 5431,
+    "sha256": "81e16901594457aaaf6426246fdbfae638fdb2aa2c1dd8dd5d110c04b822d39b",
+    "fetched_at": "2026-08-25T13:29:41.609207+00:00"
+  },
+  "dbpedia-databus-collection-downloader": {
+    "repo": "dbpedia-databus-collection-downloader",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/dbpedia-databus-collection-downloader/blob/master/README.md",
+    "github_sha": "cd20a158f4e10b6f46b744feda51fa2960d74776",
+    "size_bytes": 1971,
+    "sha256": "c29ca12edbf5b653fe7ea222f9fdc26282be133dc2c0d70c486273ed23acd375",
+    "fetched_at": "2026-08-25T13:29:42.224733+00:00"
+  },
+  "DiCE": {
+    "repo": "DiCE",
+    "path": "README.rst",
+    "readme_type": "rst",
+    "source_url": "https://github.com/Manas-Dikshit/DiCE/blob/main/README.rst",
+    "github_sha": "ac5e4091cec9b81b22c5fed0aa198cf8ebdddebc",
+    "size_bytes": 19657,
+    "sha256": "699f0711fde6b5fe5ade3dd604aea93c024115f1de788445dacfd30b29bdeb02",
+    "fetched_at": "2026-08-25T13:29:44.350625+00:00"
   }
 }

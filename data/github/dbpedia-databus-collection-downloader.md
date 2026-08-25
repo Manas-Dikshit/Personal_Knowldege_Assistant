@@ -1,22 +1,3 @@
-Repository: dbpedia-databus-collection-downloader
-
-Description:
-No description
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-0
-
-Repository URL:
-https://github.com/Manas-Dikshit/dbpedia-databus-collection-downloader
-
-README:
-
 # DBpedia Databus Collection Downloader
 
 This is a light-weight dockerized data-downloader for the DBpedia Databus. This container takes a collection URI and pulls its data to a local directory. It does not support any format or compression conversion. If your application requires conversion, please check the [Databus Client](https://github.com/dbpedia/databus-client). 
