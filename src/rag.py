@@ -179,3 +179,54 @@ ANSWER:
             question,
             k=k
         )
+
+    def ask_detailed(
+        self,
+        question: str,
+        k: int = 5,
+        temperature: float = 0.3
+    ) -> dict:
+        """
+        Answer plus retrieval provenance for UI source attribution.
+        """
+
+        chunks = self.retriever.retrieve(
+            question,
+            k=k
+        )
+
+        sources = []
+        seen = set()
+
+        for chunk in chunks:
+            md = chunk.metadata
+
+            key = (
+                md.get("source"),
+                md.get("repo") or md.get("file") or "",
+                md.get("section") or ""
+            )
+
+            if key in seen:
+                continue
+            seen.add(key)
+
+            label = key[1] or md.get("path", "")
+            if key[2]:
+                label += f" — {key[2]}"
+
+            sources.append(
+                {
+                    "source": md.get("source", ""),
+                    "label": label,
+                    "score": round(chunk.score, 3)
+                }
+            )
+
+        answer = self.generate(
+            question,
+            k=k,
+            temperature=temperature
+        )
+
+        return {"answer": answer, "sources": sources}

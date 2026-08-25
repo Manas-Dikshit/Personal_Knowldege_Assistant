@@ -53,6 +53,35 @@ class MRDAI:
             k=self.top_k
         )
 
+    def ask_with_sources(
+        self,
+        question: str
+    ) -> dict:
+        """
+        Answer plus source attribution for the web UI.
+        """
+
+        empty = {"answer": "", "sources": []}
+
+        if not question or not question.strip():
+            return {**empty, "answer": "Please provide a question."}
+
+        try:
+            self._ensure_ready()
+        except (ValueError, RuntimeError) as exc:
+            return {
+                **empty,
+                "answer": (
+                    f"Knowledge base unavailable: {exc}. "
+                    "Build it first with 'python main.py'."
+                )
+            }
+
+        return self._rag.ask_detailed(
+            question,
+            k=self.top_k
+        )
+
 
 # Singleton instance (lazy: nothing loads until first ask()).
 mrd_ai = MRDAI()

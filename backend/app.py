@@ -29,6 +29,9 @@ def chat(request: ChatRequest):
             detail="Message cannot be empty."
         )
 
-    response = mrd_ai.ask(request.message)
+    result = mrd_ai.ask_with_sources(request.message)
 
-    return ChatResponse(response=response)
+    return ChatResponse(
+        response=result["answer"],
+        sources=result["sources"][:4]
+    )

@@ -2,128 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#05070f">
     <title>MRD Assistant</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet">
 
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="container">
-
-    <!-- Header -->
-    <header class="header">
-
-        <div class="assistant-info">
-
-            <div>
-                <h1>MRD Assistant</h1>
-
-                <p>
-                    Ask anything about projects, experience and skills.
-                </p>
-            </div>
-
-            <div class="assistant-status">
-                <span class="status-dot"></span>
-                Online
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <!-- Welcome -->
-    <section class="welcome-section">
-
-        <h2>
-            How can I help you today?
-        </h2>
-
-        <p>
-            Ask anything about MRD's projects, technologies, experience and achievements.
-        </p>
-
-    </section>
-
-
-    <!-- Suggestions -->
-
-    <section class="suggestions">
-
-        <button class="suggestion-card">
-            Featured Projects
-        </button>
-
-        <button class="suggestion-card">
-            Experience
-        </button>
-
-        <button class="suggestion-card">
-            Technical Skills
-        </button>
-
-        <button class="suggestion-card">
-            Certifications
-        </button>
-
-    </section>
-
-
-    <!-- Chat -->
-
-    <main class="chat-container" id="chat-container">
-
-        <div class="message bot">
-
-            <div class="message-content">
-
-                Hello! I'm MRD Assistant.
-
-                Ask me anything about MRD's projects, experience and skills.
-
-            </div>
-
-        </div>
-
-    </main>
-
-
-    <!-- Input -->
-
-    <section class="input-section">
-
-        <div class="input-container">
-
-            <textarea
-                id="message-input"
-                placeholder="Message MRD Assistant..."
-                rows="1"></textarea>
-
-            <button id="send-btn">
-                Send
-            </button>
-
-        </div>
-
-        <div class="footer-text">
-
-            MRD Assistant may produce inaccurate information. Verify important information.
-
-        </div>
-
-    </section>
-
+<div class="aurora" aria-hidden="true">
+    <div class="aurora-blob a1"></div>
+    <div class="aurora-blob a2"></div>
+    <div class="aurora-blob a3"></div>
 </div>
 
-<script src="script.js"></script>
+<main class="window" role="main">
 
+    <!-- Title bar -->
+    <header class="titlebar">
+        <div class="traffic-lights" aria-hidden="true">
+            <span class="tl red"></span>
+            <span class="tl yellow"></span>
+            <span class="tl green"></span>
+        </div>
+
+        <div class="titlebar-center">
+            <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l2.4 5.2L20 8l-4 4.1.9 5.9L12 15.4 7.1 18l.9-5.9L4 8l5.6-.8z"/>
+            </svg>
+            <h1>MRD&nbsp;Assistant</h1>
+        </div>
+
+        <div class="status-pill" id="status-pill">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Connecting…</span>
+        </div>
+    </header>
+
+    <!-- Chat scroll area -->
+    <section class="chat-scroll" id="chat-container" aria-live="polite"></section>
+
+    <!-- Welcome hero (hidden after first message) -->
+    <section class="hero" id="hero">
+        <p class="hero-kicker">Personal Knowledge Engine</p>
+        <h2 class="hero-title">Ask me anything about<br><span class="gradient-text">Manas' world.</span></h2>
+        <p class="hero-sub">
+            Projects · Experience · Skills · Open source · Certifications
+        </p>
+
+        <div class="suggestions" id="suggestions">
+            <button class="chip">🚀 Featured Projects</button>
+            <button class="chip">💼 Work Experience</button>
+            <button class="chip">🧠 Technical Skills</button>
+            <button class="chip">🎓 Education &amp; CGPA</button>
+            <button class="chip">📜 Certifications</button>
+            <button class="chip">🌍 Open Source Activity</button>
+        </div>
+    </section>
+
+    <!-- Composer -->
+    <footer class="composer-wrap">
+        <form class="composer" id="composer">
+            <textarea id="message-input" rows="1" placeholder="Message MRD Assistant…"
+                      autocomplete="off" spellcheck="false"></textarea>
+            <button type="submit" id="send-btn" aria-label="Send message" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+            </button>
+        </form>
+        <p class="footnote">
+            Runs fully local — FAISS + Ollama. Responses may be inaccurate; verify what matters.
+        </p>
+    </footer>
+
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
