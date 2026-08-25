@@ -668,5 +668,75 @@
     "size_bytes": 2074,
     "sha256": "0df42cd87b179f4a09410428fb217ff2d56857812372e356158b07e669df80d4",
     "fetched_at": "2026-08-25T13:30:30.116822+00:00"
+  },
+  "oppiabot": {
+    "repo": "oppiabot",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/oppiabot/blob/master/README.md",
+    "github_sha": "7530bb6cf1b3cdd159cb5ab707870e470a97c33b",
+    "size_bytes": 6455,
+    "sha256": "50cd49d04b9b6b985b9c25088998bd78224fbb0cdf0a80180aff797b6bb118d1",
+    "fetched_at": "2026-08-25T13:30:30.760501+00:00"
+  },
+  "OS-Lab": {
+    "repo": "OS-Lab",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/OS-Lab/blob/main/README.md",
+    "github_sha": "27853664fce1e4819dfed24f86dddf7169797662",
+    "size_bytes": 4793,
+    "sha256": "de655933a3f133ab4fcf6a4d7fd094700b6a58a9f470696d1baef60094907297",
+    "fetched_at": "2026-08-25T13:30:31.377109+00:00"
+  },
+  "OSM-binary": {
+    "repo": "OSM-binary",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/OSM-binary/blob/master/README.md",
+    "github_sha": "e8635ec1be13bc00b5d13b101fa87ce0a3e4e891",
+    "size_bytes": 2309,
+    "sha256": "c41dac922794b828135d680dd261cd460e60e9e6c2a8e7eda39c88e4e08bbdee",
+    "fetched_at": "2026-08-25T13:30:32.094103+00:00"
+  },
+  "osmosis": {
+    "repo": "osmosis",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/osmosis/blob/main/README.md",
+    "github_sha": "3046b6c955f677146fa69ecf7dad1b01c9ab0068",
+    "size_bytes": 2106,
+    "sha256": "46216cedb6758db8fcefc1385876548fba55cb2b68ec335e3329bdc8f0384286",
+    "fetched_at": "2026-08-25T13:30:32.708429+00:00"
+  },
+  "parquet-java": {
+    "repo": "parquet-java",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/parquet-java/blob/master/README.md",
+    "github_sha": "828d4859cc1152e9cb7907d471e3042907ac35db",
+    "size_bytes": 10276,
+    "sha256": "cd36f9ba9e93d2762e945fbcbad93eca0b7328d26b7e9b7822c2384107fcf1bc",
+    "fetched_at": "2026-08-25T13:30:33.293299+00:00"
+  },
+  "Personal_Knowldege_Assistant": {
+    "repo": "Personal_Knowldege_Assistant",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/Personal_Knowldege_Assistant/blob/main/README.md",
+    "github_sha": "46cd16bcec84c8f4d58c284d382d8816fc3c244e",
+    "size_bytes": 5421,
+    "sha256": "29f8f40b7b1db6b0b05be91f1fe8b4ac694031d1fd4e7163f5b0ef7cca09bf3f",
+    "fetched_at": "2026-08-25T13:30:33.938880+00:00"
+  },
+  "pinot": {
+    "repo": "pinot",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/pinot/blob/master/README.md",
+    "github_sha": "682ff6a6392158998a6f2841dca8c7087f8e7d7b",
+    "size_bytes": 10039,
+    "sha256": "8aee71e34a3642c4943a2831a6f8f14eab099b8159a378908b4c060b5e5eb417",
+    "fetched_at": "2026-08-25T13:30:34.550495+00:00"
   }
 }
