@@ -81,7 +81,11 @@ def build_index() -> int:
 
     embeddings = get_embeddings(texts)
 
-    store = VectorStore(dim=embeddings.shape[1])
+    # Fresh index replaces any stale one on disk.
+    store = VectorStore(
+        dim=embeddings.shape[1],
+        load_if_exists=False
+    )
     store.add(
         embeddings=embeddings,
         texts=texts,

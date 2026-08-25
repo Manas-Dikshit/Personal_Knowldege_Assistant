@@ -35,9 +35,11 @@ class EmbeddingModel:
             device=self.device
         )
 
-        self.embedding_dim = (
-            self.model.get_sentence_embedding_dimension()
+        get_dim = (
+            getattr(self.model, "get_embedding_dimension", None)
+            or self.model.get_sentence_embedding_dimension
         )
+        self.embedding_dim = int(get_dim())
 
     def embed_documents(
         self,

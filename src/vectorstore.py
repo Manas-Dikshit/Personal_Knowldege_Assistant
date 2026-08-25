@@ -20,7 +20,8 @@ class VectorStore:
         self,
         dim: Optional[int] = None,
         index_path: Path = INDEX_PATH,
-        metadata_path: Path = METADATA_PATH
+        metadata_path: Path = METADATA_PATH,
+        load_if_exists: bool = True
     ):
         self.dim = dim
 
@@ -34,7 +35,7 @@ class VectorStore:
         # }
         self.documents: List[Dict] = []
 
-        if self.index_path.exists():
+        if load_if_exists and self.index_path.exists():
             self.load()
             return
 
