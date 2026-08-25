@@ -16,7 +16,10 @@ import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from src.config import CHUNK_MAX_CHARS
+try:
+    from src.config import CHUNK_MAX_CHARS
+except ImportError:  # direct script execution: python src/linkedin.py
+    from config import CHUNK_MAX_CHARS
 
 
 # ---------------------------------------------------------------------
