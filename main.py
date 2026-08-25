@@ -1,13 +1,12 @@
-from src.ingest import load_all_data
+from llm import MRDAI
 from src.chunk import (
     chunk_resume,
     chunk_readme,
     chunk_contribution
 )
 from src.embed import get_embeddings
+from src.ingest import load_all_data
 from src.vectorstore import VectorStore
-from src.retrieve import Retriever
-from src.rag import RAG
 
 
 def build_documents():
@@ -20,29 +19,22 @@ def build_documents():
     documents = []
 
     # Resume
-    resume_chunks = chunk_resume(
-        data["resume"]["text"]
-    )
+    if data["resume"]["text"]:
 
-    for chunk in resume_chunks:
-        documents.append(
-            {
-                "text": chunk,
-                "metadata": {
-                    "source": "resume"
+        for chunk in chunk_resume(data["resume"]["text"]):
+            documents.append(
+                {
+                    "text": chunk,
+                    "metadata": {
+                        "source": "resume"
+                    }
                 }
-            }
-        )
+            )
 
     # GitHub repositories
     for repo in data["github"]:
 
-        repo_chunks = chunk_readme(
-            repo["text"]
-        )
-
-        for chunk in repo_chunks:
-
+        for chunk in chunk_readme(repo["text"]):
             documents.append(
                 {
                     "text": chunk,
@@ -55,112 +47,82 @@ def build_documents():
             )
 
     # Contribution history
-    contribution_chunks = chunk_contribution(
-        data["contributions"]["text"]
-    )
+    if data["contributions"]["text"]:
 
-    for chunk in contribution_chunks:
-
-        documents.append(
-            {
-                "text": chunk,
-                "metadata": {
-                    "source": "contributions"
+        for chunk in chunk_contribution(data["contributions"]["text"]):
+            documents.append(
+                {
+                    "text": chunk,
+                    "metadata": {
+                        "source": "contributions"
+                    }
                 }
-            }
+            )
+
+    if not documents:
+        raise RuntimeError(
+            "No indexable content found. Check your data/ directory."
         )
 
     return documents
 
 
-def build_index():
+def build_index() -> int:
     """
-    Create embeddings and populate FAISS.
+    Create embeddings and populate FAISS. Returns the embedding dim.
     """
 
     print("\nBuilding knowledge base...\n")
 
     documents = build_documents()
 
-    texts = [
-        doc["text"]
-        for doc in documents
-    ]
-
-    metadata = [
-        doc["metadata"]
-        for doc in documents
-    ]
+    texts = [doc["text"] for doc in documents]
+    metadata = [doc["metadata"] for doc in documents]
 
     embeddings = get_embeddings(texts)
 
-    store = VectorStore(
-        dim=embeddings.shape[1]
-    )
-
+    store = VectorStore(dim=embeddings.shape[1])
     store.add(
         embeddings=embeddings,
         texts=texts,
         metadata=metadata
     )
-
     store.save()
 
     print(f"Indexed {len(texts)} chunks.")
     print("Knowledge base ready.\n")
 
-    return embeddings.shape[1]
+    return int(embeddings.shape[1])
 
 
 def interactive_chat():
     """
-    Start chat loop.
+    Start chat loop using the shared MRDAI pipeline.
     """
 
-    retriever = Retriever(
-        dim=384
-    )
-
-    rag = RAG(
-        retriever=retriever,
-        model="llama3"
-    )
+    assistant = MRDAI()
 
     print("MRD AI Ready")
     print("Type 'exit' to quit.\n")
 
     while True:
 
-        question = input("You: ").strip()
-
-        if question.lower() in {
-            "exit",
-            "quit"
-        }:
+        try:
+            question = input("You: ").strip()
+        except (EOFError, KeyboardInterrupt):
             break
 
-        try:
+        if question.lower() in {"exit", "quit"}:
+            break
 
-            answer = rag.generate(
-                question
-            )
+        answer = assistant.ask(question)
 
-            print("\nMRD:", answer)
-            print()
-
-        except Exception as e:
-
-            print(
-                f"\nError: {e}\n"
-            )
+        print("\nMRD:", answer)
+        print()
 
 
 def main():
-
-    # Build FAISS index
     build_index()
-
-    # Start chatbot
     interactive_chat()
 
 
