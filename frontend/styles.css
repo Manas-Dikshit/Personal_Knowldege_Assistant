@@ -100,12 +100,25 @@ body {
     align-items: center;
 }
 
+/* Light "app icon" chip so the logo's dark artwork stays visible
+   against the black titlebar. */
+.logo-chip {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    background: #f2ede6;
+    border-radius: 9px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 3px 10px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
 .titlebar-center .logo {
     height: 26px;
-    width: auto;
-    max-width: 220px;
+    width: 26px;
     object-fit: contain;
-    opacity: 0.92;
 }
 
 .status-pill {
