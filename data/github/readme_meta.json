@@ -338,5 +338,15 @@
     "size_bytes": 5432,
     "sha256": "5d151c6ca7635380b22a19bbc6701ed5693dd5e15fedbe85fad7106346b0fbef",
     "fetched_at": "2026-08-25T13:29:57.789765+00:00"
+  },
+  "incubator-kie-drools": {
+    "repo": "incubator-kie-drools",
+    "path": "README.md",
+    "readme_type": "md",
+    "source_url": "https://github.com/Manas-Dikshit/incubator-kie-drools/blob/main/README.md",
+    "github_sha": "00110beaeda5a583daadfbe033c62864851b4c0d",
+    "size_bytes": 4697,
+    "sha256": "9ccc3960fab17dae5142981196ed94e3a07d7cd5065bef72300854e9522f5739",
+    "fetched_at": "2026-08-25T13:29:58.886906+00:00"
   }
 }

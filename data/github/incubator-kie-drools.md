@@ -1,22 +1,3 @@
-Repository: incubator-kie-drools
-
-Description:
-Drools is a rule engine, DMN engine and complex event processing (CEP) engine for Java.
-
-Language:
-Java
-
-Topics:
-
-
-Stars:
-1
-
-Repository URL:
-https://github.com/Manas-Dikshit/incubator-kie-drools
-
-README:
-
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -110,3 +91,7 @@ Plugins exists to use it in different IDE:
 * [IDEA](https://plugins.jetbrains.com/plugin/7017-plantuml-integration)
 * [Eclipse](https://marketplace.eclipse.org/content/plantuml-plugin)
 * [VisualStudio](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml)
+
+
+
+
