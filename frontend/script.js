@@ -2,6 +2,8 @@ const chatContainer = document.getElementById("chat-container");
 const input = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 
+const API_URL = "http://127.0.0.1:8000/chat";
+
 let isLoading = false;
 
 function addMessage(text, sender) {
