@@ -39,20 +39,30 @@ def load_resume(path: str) -> str:
 # ---------------------------------------------------------------------
 # Markdown Loader
 # ---------------------------------------------------------------------
+# Markdown Loader
+# ---------------------------------------------------------------------
 
 def load_markdown_files(folder: str) -> List[Dict]:
     """
-    Load markdown files recursively and attach metadata.
+    Load raw README files and attach fetch metadata.
 
-    Repo_README.md is a raw duplicate of the README already embedded in
-    Repo.md (written by github_fetch.py). The duplicate is skipped only
-    when the fetched file verifiably contains the same content.
+    Each {repo}.md holds the complete raw README exactly as fetched from
+    the GitHub API; readme_meta.json (written by github_fetch.py) carries
+    source URL, fetched timestamp, content hash and README type.
+
+    Legacy Repo_README.md duplicates are skipped only when their content
+    is verifiably contained in the corresponding {repo}.md file.
     """
 
     root = Path(folder)
 
     if not root.exists():
         return []
+
+    meta_path = root / "readme_meta.json"
+    fetch_meta = {}
+    if meta_path.exists():
+        fetch_meta = json.loads(meta_path.read_text(encoding="utf-8"))
 
     def _key(text: str) -> str:
         return "".join(text.split())
@@ -73,6 +83,9 @@ def load_markdown_files(folder: str) -> List[Dict]:
 
     for file in files:
 
+        if file.name == "readme_meta.json":
+            continue
+
         content = contents.get(file, "")
 
         if not content:
@@ -89,16 +102,21 @@ def load_markdown_files(folder: str) -> List[Dict]:
             ):
                 continue
 
+        repo_name = file.stem.removesuffix("_README")
+        extra = fetch_meta.get(repo_name, {})
+
         documents.append(
             {
                 "source": "github",
-                # Both Repo.md and Repo_README.md may exist; group them.
-                "repo": file.stem.removesuffix("_README"),
-                "path": str(
-                    file.relative_to(root)
-                ),
+                "repo": repo_name,
+                "path": str(file.relative_to(root)),
                 "filename": file.name,
-                "text": content
+                "text": content,
+                # Fetch provenance (empty when metadata sidecar is absent).
+                "source_url": extra.get("source_url", ""),
+                "fetched_at": extra.get("fetched_at", ""),
+                "content_hash": extra.get("sha256", ""),
+                "readme_type": extra.get("readme_type", ""),
             }
         )
 

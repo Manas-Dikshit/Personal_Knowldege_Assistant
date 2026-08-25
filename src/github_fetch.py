@@ -1,9 +1,37 @@
+"""
+Fetch canonical READMEs for all public repositories of a user via the
+GitHub REST API (never HTML scraping).
+
+- GET /user/{user}/repos handles listing; GET /repos/{user}/{repo}/readme
+  lets GitHub select the default README regardless of name/case/extension
+  (README.md, README.rst, README.txt, plain README, ...).
+- Content is stored raw and untouched next to a metadata JSON sidecar
+  containing repo, source URL, timestamp, content hash and README type.
+"""
+
 from pathlib import Path
 import base64
+import hashlib
+import json
 import os
+import time
+from datetime import datetime, timezone
 
 import requests
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
+
+GITHUB_USERNAME = "Manas-Dikshit"
+DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "github"
+META_PATH = DATA_DIR / "readme_meta.json"
+REPOS_PATH = DATA_DIR / "repos.json"
+
+BASE_URL = "https://api.github.com"
+
+MIN_README_CHARS = 20          # below this, treat the README as invalid
+MAX_RETRIES = 3                # per request
+RETRY_BACKOFF_SECONDS = 2      # exponential base
+REQUEST_TIMEOUT = 15           # seconds
 
 
 def _load_env() -> None:
@@ -23,47 +51,93 @@ def _load_env() -> None:
 
 _load_env()
 
-
-GITHUB_USERNAME = "Manas-Dikshit"
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "github"
-
-# Token read from environment or .env; raises rate limits.
-BASE_URL = "https://api.github.com"
-
 session = requests.Session()
-
-headers = {
-    "Accept": "application/vnd.github+json"
-}
+_headers = {"Accept": "application/vnd.github+json"}
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-
 if GITHUB_TOKEN:
-    headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+    _headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
 
-session.headers.update(headers)
+session.headers.update(_headers)
+
+
+class GitHubError(RuntimeError):
+    """Unrecoverable GitHub API failure after retries."""
+
+
+def api_get(
+    url: str,
+    max_retries: int = MAX_RETRIES,
+    timeout: float = REQUEST_TIMEOUT
+) -> requests.Response:
+    """
+    GET with timeout, retries and rate-limit handling.
+
+    Raises GitHubError with a clear message when all attempts fail.
+    """
+
+    last_error = ""
+
+    for attempt in range(1, max_retries + 1):
+
+        try:
+            response = session.get(url, timeout=timeout)
+        except requests.RequestException as exc:
+            last_error = f"network error: {exc}"
+            response = None
+
+        if response is not None:
+
+            # Rate limited: respect the reset time if sane, then fail hard.
+            if response.status_code == 403 and \
+                    response.headers.get("X-RateLimit-Remaining") == "0":
+
+                reset = response.headers.get("X-RateLimit-Reset")
+                wait = 5
+                if reset and reset.isdigit():
+                    wait = min(
+                        max(int(reset) - int(time.time()) + 1, 5),
+                        120
+                    )
+                raise GitHubError(
+                    "GitHub rate limit exceeded. "
+                    f"Resets in ~{wait}s. Set GITHUB_TOKEN to raise limits."
+                )
+
+            # Retryable server/network conditions.
+            if response.status_code >= 500 or response.status_code == 429:
+                last_error = f"HTTP {response.status_code}"
+                response = None
+
+        if response is not None:
+            return response
+
+        if attempt < max_retries:
+            time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+
+    raise GitHubError(f"GET {url} failed after {max_retries} tries "
+                      f"({last_error}).")
 
 
 def get_repositories() -> List[Dict]:
     """
-    Fetch all repositories for a user.
-    Handles GitHub pagination.
+    Fetch all repositories for the user. Handles pagination.
     """
 
-    repositories = []
+    repositories: List[Dict] = []
     page = 1
 
     while True:
 
-        url = (
+        response = api_get(
             f"{BASE_URL}/users/{GITHUB_USERNAME}/repos"
             f"?per_page=100&page={page}"
         )
 
-        response = session.get(
-            url,
-            timeout=15
-        )
+        if response.status_code == 404:
+            raise GitHubError(
+                f"GitHub user '{GITHUB_USERNAME}' not found."
+            )
 
         response.raise_for_status()
 
@@ -73,121 +147,220 @@ def get_repositories() -> List[Dict]:
             break
 
         repositories.extend(batch)
-
         page += 1
 
     return repositories
 
 
-def get_readme(repo_name: str) -> Optional[str]:
+def _decode_readme(payload: Dict) -> Optional[str]:
     """
-    Retrieve README content from a repository.
+    Decode base64 README content from the API payload.
+    Returns None when the content is unusable.
     """
 
-    url = (
-        f"{BASE_URL}/repos/"
-        f"{GITHUB_USERNAME}/{repo_name}/readme"
-    )
+    encoded = payload.get("content")
 
-    try:
-
-        response = session.get(
-            url,
-            timeout=15
-        )
-
-        if response.status_code != 200:
-            return None
-
-        payload = response.json()
-
-        encoded_content = payload.get("content")
-
-        if not encoded_content:
-            return None
-
-        decoded = base64.b64decode(
-            encoded_content
-        ).decode(
-            "utf-8",
-            errors="ignore"
-        )
-
-        return decoded.strip()
-
-    except requests.RequestException:
+    if payload.get("encoding") != "base64" or not encoded:
         return None
 
+    raw = base64.b64decode(encoded)
 
-def save_repository(repo: Dict, readme: Optional[str]) -> None:
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # Non-UTF8 bytes: preserve everything readable instead of failing.
+        print(f"Warning: non-UTF8 bytes in README, replacing invalid chars.")
+        return raw.decode("utf-8", errors="replace")
+
+
+def fetch_readme(repo_name: str) -> Optional[Dict]:
     """
-    Save repository metadata and README.
+    Fetch the canonical README for one repository.
+
+    Returns None when the repository genuinely has no README (404).
+    Raises GitHubError for unrecoverable API failures.
+
+    Validates the response: decodable, non-trivially-short, and complete
+    (decoded length must match the size reported by GitHub).
     """
 
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True
+    url = f"{BASE_URL}/repos/{GITHUB_USERNAME}/{repo_name}/readme"
+
+    for attempt in range(1, MAX_RETRIES + 1):
+
+        response = api_get(url)
+
+        if response.status_code == 404:
+            return None
+
+        if response.status_code != 200:
+            # 401/403 etc: unlikely to improve by retrying the same way,
+            # but surface a clear message.
+            raise GitHubError(
+                f"README fetch for '{repo_name}' failed: "
+                f"HTTP {response.status_code}"
+            )
+
+        payload = response.json()
+        content = _decode_readme(payload)
+
+        reported_size = payload.get("size", -1)
+
+        if content is None:
+            print(f"  Warning: unreadable README payload for {repo_name}.")
+        elif len(content.strip()) < MIN_README_CHARS:
+            print(f"  Warning: README for {repo_name} suspiciously short "
+                  f"({len(content)} chars); treating as missing.")
+            return None
+        elif reported_size >= 0 and len(content.encode("utf-8")) != reported_size:
+            # Truncated/partial response: retry.
+            print(f"  Truncated response ({len(content)} != {reported_size} "
+                  f"bytes); retrying ({attempt}/{MAX_RETRIES})...")
+        else:
+            return {
+                "content": content,
+                "path": payload.get("path", "README.md"),
+                "name": payload.get("name", "README.md"),
+                "html_url": payload.get("html_url", ""),
+                "github_sha": payload.get("sha", ""),
+                "size_bytes": reported_size,
+                "readme_type": Path(payload.get("name", "README.md"))
+                .suffix.lstrip(".").lower() or "plain",
+            }
+
+    raise GitHubError(
+        f"README for '{repo_name}' kept arriving truncated "
+        f"({MAX_RETRIES} attempts)."
     )
 
-    repo_name = repo["name"]
 
-    path = OUTPUT_DIR / f"{repo_name}.md"
-
-    content = f"""
-Repository: {repo_name}
-
-Description:
-{repo.get("description") or "No description"}
-
-Language:
-{repo.get("language") or "Unknown"}
-
-Topics:
-{", ".join(repo.get("topics", []))}
-
-Stars:
-{repo.get("stargazers_count", 0)}
-
-Repository URL:
-{repo.get("html_url")}
-
-README:
-
-{readme or "No README found"}
-"""
-
-    with open(
-        path,
-        "w",
-        encoding="utf-8"
-    ) as file:
-        file.write(content.strip())
+def _content_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def fetch_all_readmes() -> None:
+def load_meta() -> Dict:
+    if META_PATH.exists():
+        return json.loads(META_PATH.read_text(encoding="utf-8"))
+    return {}
+
+
+def store_readme(
+    repo_name: str,
+    fetched: Dict
+) -> str:
     """
-    Fetch metadata and README for every repository.
+    Persist the raw README exactly as fetched plus its metadata.
+
+    Returns the action taken: 'created', 'updated' or 'unchanged'.
+    Stale local copies (hash differs from freshly fetched content) are
+    replaced; identical content is left untouched.
+    """
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    target = DATA_DIR / f"{repo_name}.md"
+    meta = load_meta()
+    previous = meta.get(repo_name, {})
+
+    new_hash = _content_hash(fetched["content"])
+
+    if target.exists() and previous.get("sha256") == new_hash:
+        return "unchanged"
+
+    action = "updated" if target.exists() else "created"
+
+    # Write raw, byte-exact content. No headers, no cleaning.
+    with open(target, "w", encoding="utf-8", newline="") as f:
+        f.write(fetched["content"])
+
+    meta[repo_name] = {
+        "repo": repo_name,
+        "path": fetched["path"],
+        "readme_type": fetched["readme_type"],
+        "source_url": fetched["html_url"],
+        "github_sha": fetched["github_sha"],
+        "size_bytes": fetched["size_bytes"],
+        "sha256": new_hash,
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    META_PATH.write_text(
+        json.dumps(meta, indent=2, ensure_ascii=False),
+        encoding="utf-8"
+    )
+
+    # Remove legacy duplicate copies once the canonical file exists.
+    legacy = DATA_DIR / f"{repo_name}_README.md"
+    if legacy.exists():
+        legacy.unlink()
+
+    return action
+
+
+def fetch_all_readmes() -> Dict:
+    """
+    Refresh every repository README. Returns a summary report.
     """
 
     repositories = get_repositories()
-
     print(f"Found {len(repositories)} repositories.\n")
+
+    stats = {
+        "repositories": len(repositories),
+        "fetched": 0,
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "missing_readme": [],
+        "failed": [],
+    }
 
     for repo in repositories:
 
         repo_name = repo["name"]
-
         print(f"Fetching {repo_name}")
 
-        readme = get_readme(repo_name)
+        try:
+            fetched = fetch_readme(repo_name)
+        except GitHubError as exc:
+            print(f"  FAILED: {exc}")
+            stats["failed"].append({"repo": repo_name, "error": str(exc)})
+            continue
 
-        save_repository(
-            repo,
-            readme
-        )
+        if fetched is None:
+            stats["missing_readme"].append(repo_name)
+            continue
 
-    print("\nFinished.")
+        stats["fetched"] += 1
+
+        action = store_readme(repo_name, fetched)
+        stats[action] += 1
+
+    REPOS_PATH.write_text(
+        json.dumps([r["name"] for r in repositories], indent=2),
+        encoding="utf-8"
+    )
+
+    print(
+        f"\nDone. fetched={stats['fetched']} "
+        f"(created={stats['created']}, updated={stats['updated']}, "
+        f"unchanged={stats['unchanged']}), "
+        f"missing={len(stats['missing_readme'])}, "
+        f"failed={len(stats['failed'])}"
+    )
+
+    return stats
 
 
 if __name__ == "__main__":
-    fetch_all_readmes()
+    report = fetch_all_readmes()
+
+    if report["missing_readme"]:
+        print("\nRepositories without README:")
+        for name in report["missing_readme"]:
+            print(f"  - {name}")
+
+    if report["failed"]:
+        print("\nFailed repositories:")
+        for item in report["failed"]:
+            print(f"  - {item['repo']}: {item['error']}")
