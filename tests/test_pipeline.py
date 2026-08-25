@@ -430,6 +430,154 @@ def test_vectorstore_corrupt_metadata():
         pass
 
 
+# --------------------------------------------------------------------
+# LinkedIn CSV ingestion (temp dirs — no real data touched)
+# --------------------------------------------------------------------
+
+def _write_csv(path, text, encoding="utf-8"):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding=encoding, newline="") as f:
+        f.write(text)
+
+
+def _li_chunks(tmp):
+    from src.linkedin import chunk_linkedin
+    return chunk_linkedin(tmp)
+
+
+def test_linkedin_utf16_bom():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _write_csv(
+        tmp / "Languages.csv",
+        "Name,Proficiency\nEnglish,Full professional proficiency\n",
+        encoding="utf-16"
+    )
+    chunks, stats = _li_chunks(tmp)
+    assert stats["files"] == 1 and stats["records"] == 1
+    assert "Full professional proficiency" in chunks[0]["text"]
+    assert chunks[0]["metadata"]["category"] == "languages"
+
+
+def test_linkedin_preamble_and_quoted_fields():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    # Connections.csv style: preamble notes before the real header,
+    # plus a quoted field containing a comma and an embedded newline.
+    _write_csv(tmp / "Connections.csv", "\n".join([
+        'Notes:',
+        '"Some long note about email visibility, and more."',
+        '',
+        'First Name,Last Name,Email Address,Company',
+        'Ada,Lovelace,ada@example.com,Analytical Engines Inc',
+        'Grace,"Hopper, Rear Admiral","navy@usn.mil","""Big Co""",
+United States Fleet"',
+    ]) + "\n")
+    chunks, stats = _li_chunks(tmp)
+    assert stats["records"] == 2
+    joined = "".join(c["text"] for c in chunks)
+    assert "Analytical Engines Inc" in joined
+    assert "Hopper" in joined
+    assert "navy@usn.mil" in joined
+    assert "Notes:" not in joined, "preamble leaked into records"
+
+
+def test_linkedin_empty_fields_and_rows_kept_meaningful():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _write_csv(tmp / "Positions.csv", "\n".join([
+        "Company Name,Title,Description,Location,Started On,Finished On",
+        "",
+        "The Good Shelf,Technical Intern,,Bengaluru,Jul 2026,",
+        ",,,,,",
+        "AWS Cloud Club,President,,,Nov 2025,",
+    ]) + "\n")
+    chunks, stats = _li_chunks(tmp)
+    # Empty row skipped; rows with partial data kept despite empty fields.
+    assert stats["records"] == 2
+    joined = "".join(c["text"] for c in chunks)
+    assert "The Good Shelf" in joined and "Bengaluru" in joined
+    assert "AWS Cloud Club" in joined
+
+
+def test_linkedin_malformed_file_does_not_block_others():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    # Unclosed quote -> csv.Error; must be reported, others still ingested.
+    _write_csv(tmp / "Broken.csv", 'Name,Value\n"a"a"b\n')
+    _write_csv(tmp / "Skills.csv", "Name\nPython\nDocker\n")
+    chunks, stats = _li_chunks(tmp)
+    assert stats["records"] == 2
+    assert any(s["file"] == "Broken.csv" for s in stats["skipped"])
+    assert all(c["metadata"]["file"] == "Skills.csv" for c in chunks)
+
+
+def test_linkedin_duplicate_records_deduped_across_files():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    same = "Name,Proficiency\nEnglish,Native or bilingual proficiency\n"
+    _write_csv(tmp / "Languages.csv", same)
+    _write_csv(tmp / "Export2" / "Languages.csv", same)
+    chunks, stats = _li_chunks(tmp)
+    assert stats["records"] == 1
+    assert stats["duplicates"] == 1
+
+
+def test_linkedin_header_only_file_skipped():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _write_csv(tmp / "Notes.csv", "Connection First Name,Note,Created On\n")
+    chunks, stats = _li_chunks(tmp)
+    assert stats["records"] == 0
+    assert any(s["file"] == "Notes.csv" for s in stats["skipped"])
+
+
+def test_linkedin_chunk_metadata_integrity():
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    rows = "\n".join(f"Skill{i}," for i in range(50))
+    _write_csv(tmp / "Skills.csv", "Name,\n" + rows + "\n")
+    chunks, stats = _li_chunks(tmp)
+
+    assert len(chunks) > 1  # packing split into several chunks
+    seen_totals = set()
+    for i, c in enumerate(chunks):
+        md = c["metadata"]
+        assert md["source"] == "linkedin"
+        assert md["file"] == "Skills.csv"
+        assert md["category"] == "skills"
+        assert md["chunk_index"] == i + 1
+        seen_totals.add(md["total_chunks"])
+        assert md["row_start"] <= md["row_end"]
+        assert md["record_count"] >= 1
+    assert seen_totals == {len(chunks)}
+
+    # Every skill value survives somewhere exactly once.
+    joined = "".join(c["text"] for c in chunks)
+    for i in range(50):
+        assert f"Skill{i}" in joined
+
+
+def test_linkedin_no_conflict_with_other_sources():
+    """LinkedIn metadata stays namespaced and never claims github/resume."""
+    import tempfile
+    from pathlib import Path as P
+    tmp = P(tempfile.mkdtemp())
+    _write_csv(tmp / "Profile.csv",
+               'First Name,Last Name\nManas,Ranjan Dikshit\n')
+    chunks, _ = _li_chunks(tmp)
+    md = chunks[0]["metadata"]
+    assert md["source"] == "linkedin"
+    assert {"file", "path", "category", "row"} <= set(md)
+
+
 if __name__ == "__main__":
     tests = [
         test_clean_text,
@@ -448,6 +596,14 @@ if __name__ == "__main__":
         test_fetch_readme_utf16_fallback,
         test_store_readme_unicode_and_stale_replacement,
         test_ingest_no_silent_loss_end_to_end,
+        test_linkedin_utf16_bom,
+        test_linkedin_preamble_and_quoted_fields,
+        test_linkedin_empty_fields_and_rows_kept_meaningful,
+        test_linkedin_malformed_file_does_not_block_others,
+        test_linkedin_duplicate_records_deduped_across_files,
+        test_linkedin_header_only_file_skipped,
+        test_linkedin_chunk_metadata_integrity,
+        test_linkedin_no_conflict_with_other_sources,
         test_vectorstore_roundtrip,
         test_vectorstore_corrupt_metadata,
     ]
