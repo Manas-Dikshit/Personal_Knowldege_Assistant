@@ -6,10 +6,28 @@ import requests
 from typing import List, Dict, Optional
 
 
+def _load_env() -> None:
+    """
+    Minimal .env loader: sets KEY=VALUE pairs into os.environ
+    without overriding existing variables. No external dependency.
+    """
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
+_load_env()
+
+
 GITHUB_USERNAME = "Manas-Dikshit"
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "github"
 
-# Optional token to increase rate limits (set GITHUB_TOKEN env var).
+# Token read from environment or .env; raises rate limits.
 BASE_URL = "https://api.github.com"
 
 session = requests.Session()
