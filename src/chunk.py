@@ -237,48 +237,102 @@ RESUME_HEADERS = [
     "certifications",
     "achievements",
     "publications",
-    "volunteering"
+    "volunteering",
+    "positions",
+    "roles",
+    "contact",
 ]
 
+_HEADER_LINE_RE = re.compile(
+    r"(?i)^(" + "|".join(RESUME_HEADERS) + r")\b\s*:?\s*$"
+)
 
-def chunk_resume(text: str) -> List[str]:
+
+def chunk_resume(
+    text: str,
+    max_chars: int = 800
+) -> List[Dict[str, str]]:
     """
-    Chunk resumes by sections.
+    Losslessly chunk extracted resume text.
+
+    Returns [{"text", "section"}, ...]. Section headers (Education,
+    Experience, Skills, ...) start new sections; everything else is
+    packed into chunks <= max_chars. No line is ever dropped, so short
+    sections and single-line items are preserved.
     """
 
-    text = clean_text(text)
+    normalized = _normalize_markdown(text)
 
-    pattern = (
-        r"(?i)(?=^("
-        + "|".join(RESUME_HEADERS)
-        + r")\b)"
-    )
+    if not normalized:
+        return []
 
-    sections = re.split(
-        pattern,
-        text,
-        flags=re.MULTILINE
-    )
+    # Tokenize into blocks; a known header line starts a new section.
+    blocks: List[Dict[str, str]] = []
+    section = ""
+    buf: List[str] = []
 
-    chunks = []
+    def flush() -> None:
+        if buf:
+            block_text = "\n".join(buf).strip()
+            if block_text:
+                blocks.append({"section": section, "text": block_text})
+            buf.clear()
 
-    buffer = ""
+    for line in normalized.split("\n"):
+        stripped = line.strip()
 
-    for section in sections:
-
-        section = section.strip()
-
-        if len(section) < 40:
+        if _HEADER_LINE_RE.match(stripped):
+            flush()
+            section = stripped.rstrip(":").strip().title()
+            buf.append(line)
             continue
 
-        buffer += "\n\n" + section
+        if not stripped:
+            flush()
+            continue
 
-        if len(buffer) >= 300:
-            chunks.append(buffer.strip())
-            buffer = ""
+        buf.append(line)
 
-    if buffer:
-        chunks.append(buffer.strip())
+    flush()
+
+    # Pack blocks into chunks, one section per chunk.
+    chunks: List[Dict[str, str]] = []
+    current_lines: List[str] = []
+    current_len = 0
+    current_section = ""
+
+    for block in blocks:
+
+        for piece in ([block["text"]]
+                      if len(block["text"]) <= max_chars
+                      else _hard_split(block["text"], max_chars)):
+
+            if current_lines and (
+                current_len + 2 + len(piece) > max_chars
+                or block["section"] != current_section
+            ):
+                chunks.append(
+                    {
+                        "text": "\n\n".join(current_lines),
+                        "section": current_section,
+                    }
+                )
+                current_lines = []
+                current_len = 0
+
+            if not current_lines:
+                current_section = block["section"]
+
+            current_lines.append(piece)
+            current_len += len(piece) + (2 if current_len else 0)
+
+    if current_lines:
+        chunks.append(
+            {
+                "text": "\n\n".join(current_lines),
+                "section": current_section,
+            }
+        )
 
     return chunks
 

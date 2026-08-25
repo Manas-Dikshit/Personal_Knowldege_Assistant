@@ -21,12 +21,18 @@ def build_documents():
     # Resume
     if data["resume"]["text"]:
 
-        for chunk in chunk_resume(data["resume"]["text"]):
+        resume_chunks = chunk_resume(data["resume"]["text"])
+        total = len(resume_chunks)
+
+        for i, chunk in enumerate(resume_chunks):
             documents.append(
                 {
-                    "text": chunk,
+                    "text": chunk["text"],
                     "metadata": {
-                        "source": "resume"
+                        "source": "resume",
+                        "section": chunk.get("section", ""),
+                        "chunk_index": i + 1,
+                        "total_chunks": total
                     }
                 }
             )
@@ -47,7 +53,11 @@ def build_documents():
                         "path": repo["path"],
                         "section": chunk.get("section", ""),
                         "chunk_index": i + 1,
-                        "total_chunks": total
+                        "total_chunks": total,
+                        "source_url": repo.get("source_url", ""),
+                        "fetched_at": repo.get("fetched_at", ""),
+                        "content_hash": repo.get("content_hash", ""),
+                        "readme_type": repo.get("readme_type", "")
                     }
                 }
             )

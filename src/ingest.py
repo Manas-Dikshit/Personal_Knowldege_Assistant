@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 from typing import Dict, List
 
 from pypdf import PdfReader
@@ -36,8 +37,6 @@ def load_resume(path: str) -> str:
     return "\n\n".join(pages)
 
 
-# ---------------------------------------------------------------------
-# Markdown Loader
 # ---------------------------------------------------------------------
 # Markdown Loader
 # ---------------------------------------------------------------------
