@@ -347,11 +347,3 @@ if __name__ == "__main__":
     for item in stats["skipped"]:
         print(f"  - {item['file']}: {item['reason']}")
     print(f"chunks      : {len(chunks)}")
-
-    print(f"files       : {stats['files']}")
-    print(f"records     : {stats['records']}")
-    print(f"duplicates  : {stats['duplicates']}")
-    print(f"skipped     : {len(stats['skipped'])}")
-    for item in stats["skipped"]:
-        print(f"  - {item['file']}: {item['reason']}")
-    print(f"chunks      : {len(chunks)}")
