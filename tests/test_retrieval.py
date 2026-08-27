@@ -47,7 +47,7 @@ def test_source_boost_bounds_scores():
     # Boost must be small and not blow cosine scores out of range.
     r = Retriever.__new__(Retriever)
     assert r._source_boost({"source": "resume"}) > r._source_boost({"source": "github"})
-    assert r._source_boost({"source": "github"}) >= r._source_boost({"source": "linkedin"])
+    assert r._source_boost({"source": "github"}) >= r._source_boost({"source": "linkedin"})
     # Even the strongest (resume) keeps scores near/under 1 for raw ~0.9.
     assert r._source_boost({"source": "resume"}) < 1.2
 
