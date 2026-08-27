@@ -13,11 +13,12 @@ import numpy as np
 from src.retrieve import Retriever, RetrievedChunk
 from src.config import (
     SOURCE_PRIORITY,
+    SOURCE_BOOST_STRENGTH,
     DEFAULT_K,
     RERANK_ENABLED,
     RERANK_TOP_N,
     DEDUP_ENABLED,
-    DEDUP_SCORE_TOLERANCE,
+    DEDUP_THRESHOLD,
 )
 
 
@@ -29,12 +30,11 @@ def _mk(chunks):
 
 
 # --------------------------------------------------------------------
-# Source priority
+# Source priority / boost
 # --------------------------------------------------------------------
 
 def test_source_priority_values_ordered():
-    # Resume/profile (authoritative) must rank higher than others,
-    # and each configured source resolves to a positive weight.
+    # Resume/profile (authoritative) must rank higher than others.
     assert SOURCE_PRIORITY["resume"] > SOURCE_PRIORITY["github"]
     assert SOURCE_PRIORITY["resume"] > SOURCE_PRIORITY["linkedin"]
     assert SOURCE_PRIORITY["github"] >= SOURCE_PRIORITY["linkedin"]
@@ -43,69 +43,105 @@ def test_source_priority_values_ordered():
         assert v > 0
 
 
-def test_source_priority_unknown_defaults_to_one():
+def test_source_boost_bounds_scores():
+    # Boost must be small and not blow cosine scores out of range.
     r = Retriever.__new__(Retriever)
-    assert r._source_priority({"source": "unknown"}) == 1.0
-    assert r._source_priority({}) == 1.0
+    assert r._source_boost({"source": "resume"}) > r._source_boost({"source": "github"})
+    assert r._source_boost({"source": "github"}) >= r._source_boost({"source": "linkedin"])
+    # Even the strongest (resume) keeps scores near/under 1 for raw ~0.9.
+    assert r._source_boost({"source": "resume"}) < 1.2
+
+
+def test_source_boost_unknown_defaults_to_one():
+    r = Retriever.__new__(Retriever)
+    assert r._source_boost({"source": "unknown"}) == 1.0
+    assert r._source_boost({}) == 1.0
 
 
 # --------------------------------------------------------------------
-# Deduplication keys
+# Container grouping
 # --------------------------------------------------------------------
 
-def test_dedup_key_uses_source_repo_section():
+def test_container_grouping_cross_source_distinct():
     r = Retriever.__new__(Retriever)
-
-    md1 = {"source": "github", "repo": "L4SBOA", "section": "Intro"}
-    md2 = {"source": "github", "repo": "L4SBOA", "section": "Intro"}
-    md3 = {"source": "github", "repo": "L4SBOA", "section": "Install"}
-    md4 = {"source": "resume", "repo": "L4SBOA", "section": "Intro"}
-
-    assert r._dedup_key(md1) == r._dedup_key(md2)
-    assert r._dedup_key(md1) != r._dedup_key(md3)
-    assert r._dedup_key(md1) != r._dedup_key(md4)
+    resume = {"source": "resume", "section": "Skills"}
+    linkedin = {"source": "linkedin", "file": "Skills.csv", "category": "skills"}
+    github = {"source": "github", "repo": "R", "section": "Skills"}
+    assert r._container(resume) != r._container(linkedin)
+    assert r._container(linkedin) != r._container(github)
 
 
-def test_dedup_key_uses_content_hash_when_present():
+def test_container_same_source_similar_collapses():
     r = Retriever.__new__(Retriever)
+    a = {"source": "github", "repo": "R", "section": "S"}
+    b = {"source": "github", "repo": "R", "section": "S"}
+    c = {"source": "github", "repo": "R", "section": "Other"}
+    assert r._container(a) == r._container(b)
+    assert r._container(a) != r._container(c)
 
-    md1 = {"source": "github", "repo": "R", "section": "S", "content_hash": "abc"}
-    md2 = {"source": "github", "repo": "R", "section": "S", "content_hash": "xyz"}
-    assert r._dedup_key(md1) != r._dedup_key(md2)
+
+# --------------------------------------------------------------------
+# Content overlap
+# --------------------------------------------------------------------
+
+def test_overlap_identical():
+    r = Retriever.__new__(Retriever)
+    assert r._overlap("python docker fastapi", "python docker fastapi") == 1.0
+
+
+def test_overlap_disjoint():
+    r = Retriever.__new__(Retriever)
+    assert r._overlap("python docker", "react node") == 0.0
+
+
+def test_overlap_partial():
+    r = Retriever.__new__(Retriever)
+    # 1 of 2 tokens overlap -> 0.5 (smaller set is size 2)
+    assert r._overlap("python docker", "python react") == 0.5
 
 
 # --------------------------------------------------------------------
 # Deduplication application
 # --------------------------------------------------------------------
 
-def test_dedup_removes_exact_duplicates():
+def test_dedup_removes_near_duplicates_same_container():
     r = Retriever.__new__(Retriever)
     chunks = _mk([
-        ("t1", 0.9, {"source": "github", "repo": "R", "section": "S"}),
-        ("t2", 0.85, {"source": "github", "repo": "R", "section": "S"}),
-        ("t3", 0.8, {"source": "github", "repo": "R", "section": "Other"}),
+        ("python docker fastapi sqlite", 0.9,
+         {"source": "github", "repo": "R", "section": "S"}),
+        ("python docker fastapi sqlite redis", 0.85,
+         {"source": "github", "repo": "R", "section": "S"}),
+        ("react node typescript", 0.8,
+         {"source": "github", "repo": "R", "section": "S"}),
     ])
     out = r._apply_dedup(chunks)
-    # Two unique keys -> one duplicate dropped.
+    # First two overlap heavily -> one dropped; third kept.
     assert len(out) == 2
 
 
-def test_dedup_keeps_better_duplicate():
+def test_dedup_preserves_distinct_linkedin_chunks():
+    # Distinct skill subsets must NOT collapse through dedup.
     r = Retriever.__new__(Retriever)
     chunks = _mk([
-        ("low", 0.5, {"source": "github", "repo": "R", "section": "S"}),
-        ("high", 0.95, {"source": "github", "repo": "R", "section": "S"}),
+        ("LinkedIn skills: python docker fastapi", 0.8,
+         {"source": "linkedin", "file": "Skills.csv", "category": "skills"}),
+        ("LinkedIn skills: react node typescript", 0.79,
+         {"source": "linkedin", "file": "Skills.csv", "category": "skills"}),
+        ("LinkedIn skills: docker kubernetes", 0.78,
+         {"source": "linkedin", "file": "Skills.csv", "category": "skills"}),
     ])
     out = r._apply_dedup(chunks)
-    assert len(out) == 2  # both kept because better is significantly higher
+    assert len(out) == 3
 
 
-def test_dedup_cross_source_preserved():
-    # Same repo/section but different source must NOT dedup (both kept).
+def test_dedup_preserves_cross_source():
+    # Same topic from different sources must both be kept.
     r = Retriever.__new__(Retriever)
     chunks = _mk([
-        ("r1", 0.7, {"source": "resume", "repo": "X", "section": "Skills"}),
-        ("g1", 0.7, {"source": "github", "repo": "X", "section": "Skills"}),
+        ("python docker fastapi", 0.7,
+         {"source": "resume", "section": "Skills"}),
+        ("python docker fastapi", 0.7,
+         {"source": "github", "repo": "X", "section": "Skills"}),
     ])
     out = r._apply_dedup(chunks)
     assert len(out) == 2
@@ -118,15 +154,15 @@ def test_dedup_cross_source_preserved():
 def test_rerank_boosts_authoritative_source():
     r = Retriever.__new__(Retriever)
     chunks = _mk([
-        # A contributions result with a high raw score.
-        ("c", 0.75, {"source": "contributions"}),
-        # A resume result with a slightly lower raw score.
-        ("r", 0.70, {"source": "resume"}),
+        ("contribution log content", 0.75, {"source": "contributions"}),
+        ("resume summary content", 0.70, {"source": "resume"}),
     ])
     out = r._rerank(chunks)
-    # After boosting, resume must rank above contributions.
+    # Resume gets a boost and must now rank above the higher raw contributor.
     assert out[0].metadata["source"] == "resume"
     assert out[0].score > out[1].score
+    # Scores stay in a sane range.
+    assert 0 <= out[0].score <= 1.2
 
 
 def test_rerank_disabled_passthrough():
@@ -140,7 +176,6 @@ def test_rerank_disabled_passthrough():
             ("r", 0.70, {"source": "resume"}),
         ])
         out = r._rerank(chunks)
-        # Order and scores unchanged when rerank off.
         assert out[0].metadata["source"] == "contributions"
         assert out[0].score == 0.75
     finally:
@@ -152,9 +187,7 @@ def test_rerank_disabled_passthrough():
 # --------------------------------------------------------------------
 
 def test_retrieve_cross_source_and_dedup(tmp_path=None):
-    # Build a retriever that talks to a fake store and a stubbed
-    # embedder so no embedding model is loaded. Verifies dedup +
-    # source priority + metadata preservation.
+    # Fake store + stubbed embedder: no model loaded.
     from unittest import mock
     import tempfile
 
@@ -168,32 +201,31 @@ def test_retrieve_cross_source_and_dedup(tmp_path=None):
 
     r = Retriever.__new__(Retriever)
     r.store = FakeStore([
-        {"text": "resume a", "score": 0.7,
-         "metadata": {"source": "resume", "section": "Skills"}},
-        {"text": "github a", "score": 0.68,
-         "metadata": {"source": "github", "repo": "R", "section": "Skills"}},
-        # A duplicate of github a (same key) should be deduped.
-        {"text": "github a2", "score": 0.66,
-         "metadata": {"source": "github", "repo": "R", "section": "Skills"}},
-        {"text": "linkedin a", "score": 0.5,
-         "metadata": {"source": "linkedin", "category": "skills"}},
+        {"text": "resume summary python docker", "score": 0.7,
+         "metadata": {"source": "resume", "section": "Summary"}},
+        {"text": "github repo python docker ", "score": 0.68,
+         "metadata": {"source": "github", "repo": "R", "section": "Intro"}},
+        # Near-duplicate of github a (same container) -> dropped.
+        {"text": "github repo python docker redis", "score": 0.66,
+         "metadata": {"source": "github", "repo": "R", "section": "Intro"}},
+        {"text": "linkedin skills react node", "score": 0.5,
+         "metadata": {"source": "linkedin", "file": "Skills.csv", "category": "skills"}},
     ])
 
-    fake_emb = np.zeros((1, 4), dtype=np.float32)
-    with mock.patch("src.retrieve.embed_query", return_value=fake_emb[0]):
+    fake_emb = np.zeros(4, dtype=np.float32)
+    with mock.patch("src.retrieve.embed_query", return_value=fake_emb):
         results = r.retrieve("what are your skills", k=3)
 
-    # resume should rank first due to priority boost.
+    # resume boosted to the top.
     assert results[0].metadata["source"] == "resume"
-    # github and linkedin retained (cross-source preserved).
+    # Cross-source preserved: github + linkedin still present.
     sources = {c.metadata["source"] for c in results}
     assert {"resume", "github", "linkedin"} <= sources
-    # No duplicate github A section returned.
-    dup = [c for c in results
-           if c.metadata.get("repo") == "R" and c.metadata.get("source") == "github"]
-    assert len(dup) == 1
-    # Metadata/provenance intact.
-    assert results[0].metadata.get("source") is not None
+    # Near-duplicate github dropped.
+    github = [c for c in results if c.metadata.get("source") == "github"]
+    assert len(github) == 1
+    # Provenance intact.
+    assert all(c.metadata.get("source") for c in results)
 
 
 def test_retrieve_empty_query():
@@ -203,14 +235,13 @@ def test_retrieve_empty_query():
 
 
 def test_retrieve_returns_at_most_k():
-    import tempfile
     from unittest import mock
 
     class FakeStore:
         def __init__(self, n):
             self._chunks = [
-                {"text": f"t{i}", "score": 1 - i * 0.01,
-                 "metadata": {"source": "github", "repo": f"R{i}", "section": "S"}}
+                {"text": f"topic content block {i}", "score": 1 - i * 0.05,
+                 "metadata": {"source": "github", "repo": f"R{i % 5}", "section": "S"}}
                 for i in range(n)
             ]
             self.ntotal = n
@@ -219,7 +250,7 @@ def test_retrieve_returns_at_most_k():
             return self._chunks[:k]
 
     r = Retriever.__new__(Retriever)
-    r.store = FakeStore(30)
+    r.store = FakeStore(40)
     with mock.patch("src.retrieve.embed_query",
                     return_value=np.zeros(4, dtype=np.float32)):
         res = r.retrieve("test", k=5)
@@ -229,12 +260,16 @@ def test_retrieve_returns_at_most_k():
 if __name__ == "__main__":
     tests = [
         test_source_priority_values_ordered,
-        test_source_priority_unknown_defaults_to_one,
-        test_dedup_key_uses_source_repo_section,
-        test_dedup_key_uses_content_hash_when_present,
-        test_dedup_removes_exact_duplicates,
-        test_dedup_keeps_better_duplicate,
-        test_dedup_cross_source_preserved,
+        test_source_boost_bounds_scores,
+        test_source_boost_unknown_defaults_to_one,
+        test_container_grouping_cross_source_distinct,
+        test_container_same_source_similar_collapses,
+        test_overlap_identical,
+        test_overlap_disjoint,
+        test_overlap_partial,
+        test_dedup_removes_near_duplicates_same_container,
+        test_dedup_preserves_distinct_linkedin_chunks,
+        test_dedup_preserves_cross_source,
         test_rerank_boosts_authoritative_source,
         test_rerank_disabled_passthrough,
         test_retrieve_cross_source_and_dedup,

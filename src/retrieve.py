@@ -6,10 +6,11 @@ import numpy as np
 from src.config import (
     DEFAULT_K,
     SOURCE_PRIORITY,
+    SOURCE_BOOST_STRENGTH,
     RERANK_ENABLED,
     RERANK_TOP_N,
     DEDUP_ENABLED,
-    DEDUP_SCORE_TOLERANCE,
+    DEDUP_THRESHOLD,
 )
 from src.embed import embed_query
 from src.vectorstore import VectorStore
@@ -32,67 +33,83 @@ class Retriever:
         self.store = VectorStore(dim=dim)
         self.default_k = default_k
 
-    def _source_priority(self, metadata: Dict) -> float:
-        """Return the priority weight for a result's source."""
-        source = metadata.get("source", "contributions")
-        return SOURCE_PRIORITY.get(source, 1.0)
+    # ------------------------------------------------------------------
+    # Source-aware boost
+    # ------------------------------------------------------------------
 
-    def _dedup_key(self, metadata: Dict) -> str:
-        """Create a deduplication key from metadata."""
-        source = metadata.get("source", "")
-        repo = metadata.get("repo") or ""
-        section = metadata.get("section") or ""
-        # Include content hash if available
-        content_hash = metadata.get("content_hash", "")
-        if content_hash:
-            return f"{source}:{repo}:{section}:{content_hash[:12]}"
-        return f"{source}:{repo}:{section}"
+    def _source_boost(self, metadata: Dict) -> float:
+        """Bounded multiplicative score boost for a chunk's source."""
+        priority = SOURCE_PRIORITY.get(metadata.get("source", "contributions"), 1.0)
+        return 1.0 + (priority - 1.0) * SOURCE_BOOST_STRENGTH
+
+    # ------------------------------------------------------------------
+    # Content-based near-duplicate detection
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _container(metadata: Dict) -> tuple:
+        """Grouping identity: same source + primary locator.
+
+        Near-duplicates are only considered within the same container so
+        cross-source results are never collapsed (e.g. resume 'Python'
+        skills vs LinkedIn 'Python' skills stay separate and useful).
+        """
+        source = metadata.get("source")
+        if source == "github":
+            return (source, metadata.get("repo"), metadata.get("section"))
+        if source == "linkedin":
+            return (source, metadata.get("file"), metadata.get("category"))
+        if source == "resume":
+            return (source, metadata.get("section"))
+        return (source,)
+
+    @staticmethod
+    def _overlap(text_a: str, text_b: str) -> float:
+        """Fraction of the smaller chunk's tokens present in the larger."""
+        toks_a = set(text_a.lower().split())
+        toks_b = set(text_b.lower().split())
+        if not toks_a and not toks_b:
+            return 1.0
+        if not toks_a or not toks_b:
+            return 0.0
+        smaller = min(len(toks_a), len(toks_b))
+        inter = len(toks_a & toks_b)
+        return inter / smaller
 
     def _apply_dedup(self, results: List[RetrievedChunk]) -> List[RetrievedChunk]:
-        """Remove near-duplicate results based on dedup keys."""
+        """Drop near-duplicate chunks, keeping the highest-scoring one."""
         if not DEDUP_ENABLED:
             return results
 
-        seen = {}
-        filtered = []
+        kept: List[RetrievedChunk] = []
 
         for chunk in results:
-            key = self._dedup_key(chunk.metadata)
+            dup = False
+            for other in kept:
+                if self._container(chunk.metadata) != self._container(other.metadata):
+                    continue
+                if self._overlap(chunk.text, other.text) >= DEDUP_THRESHOLD:
+                    dup = True
+                    break
+            if not dup:
+                kept.append(chunk)
 
-            if key in seen:
-                existing = seen[key]
-                # Keep the one with higher adjusted score
-                if chunk.score > existing.score + DEDUP_SCORE_TOLERANCE:
-                    # New one is significantly better, replace
-                    seen[key] = chunk
-                    filtered.append(chunk)
-                # else: keep existing, skip this duplicate
-            else:
-                seen[key] = chunk
-                filtered.append(chunk)
-
-        return filtered
+        return kept
 
     def _rerank(self, results: List[RetrievedChunk]) -> List[RetrievedChunk]:
-        """Lightweight reranking: apply source priority to scores."""
-        if not RERANK_ENABLED or len(results) <= 1:
+        """Apply the source boost to top candidates and reorder by it."""
+        if not RERANK_ENABLED or not results:
             return results
 
-        # Take top N candidates for reranking
-        candidates = results[:RERANK_TOP_N]
+        for chunk in results:
+            chunk.score = chunk.score * self._source_boost(chunk.metadata)
 
-        for chunk in candidates:
-            priority = self._source_priority(chunk.metadata)
-            # Adjust score: original score * priority
-            # Blend with a small base to avoid extreme swings
-            chunk.score = chunk.score * 0.7 + (priority * 0.3)
+        results.sort(key=lambda c: c.score, reverse=True)
+        return results
 
-        # Re-sort by adjusted score
-        candidates.sort(key=lambda c: c.score, reverse=True)
-
-        # Return candidates + remaining in order
-        remaining = results[RERANK_TOP_N:]
-        return candidates + remaining
+    # ------------------------------------------------------------------
+    # Public retrieval
+    # ------------------------------------------------------------------
 
     def retrieve(
         self,
@@ -106,41 +123,28 @@ class Retriever:
         if k is None:
             k = self.default_k
 
-        # Embed query and shape for FAISS.
+        # Fetch a superset so dedup + rerank can still yield k results.
+        fetch_k = max(k, RERANK_TOP_N)
+
         query_embedding = np.asarray(
             [embed_query(query)],
             dtype=np.float32
         )
 
-        # Fetch a superset of results to allow dedup + reranking to
-        # keep k after filtering. Cap the superset to stay cheap.
-        fetch_k = max(k, RERANK_TOP_N)
+        raw = self.store.search(query_embedding, k=fetch_k)
 
-        results = self.store.search(
-            query_embedding,
-            k=fetch_k
-        )
-
-        # Convert to RetrievedChunk objects
         chunks = [
             RetrievedChunk(
                 text=result["text"],
                 score=result["score"],
                 metadata=result["metadata"]
             )
-            for result in results
+            for result in raw
         ]
 
-        # Apply deduplication
         chunks = self._apply_dedup(chunks)
-
-        # Apply source-aware reranking
         chunks = self._rerank(chunks)
 
-        # Re-sort by final adjusted score (rerank may have re-ordered)
-        chunks.sort(key=lambda c: c.score, reverse=True)
-
-        # Return top-k after reranking
         return chunks[:k]
 
     def get_context(
@@ -149,12 +153,6 @@ class Retriever:
         k: Optional[int] = None
     ) -> str:
 
-        chunks = self.retrieve(
-            query,
-            k
-        )
+        chunks = self.retrieve(query, k)
 
-        return "\n\n".join(
-            chunk.text
-            for chunk in chunks
-        )
+        return "\n\n".join(chunk.text for chunk in chunks)

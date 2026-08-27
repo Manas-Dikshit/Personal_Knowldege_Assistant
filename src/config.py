@@ -22,10 +22,9 @@ CHUNK_MAX_CHARS = 900
 # Source-aware ranking configuration
 # ---------------------------------------------------------------------
 
-# Priority weights per source — higher = more authoritative for that query type.
-# Resume data is given highest priority for personal info questions,
-# GitHub for project/skill questions, LinkedIn for profile/experience,
-# Contributions for activity evidence.
+# Priority per source — higher = more authoritative for tied/borderline
+# results. Resume/std profile data wins on conflict, then GitHub, then
+# LinkedIn, then raw contribution logs.
 SOURCE_PRIORITY = {
     "resume": 1.5,
     "github": 1.2,
@@ -33,8 +32,19 @@ SOURCE_PRIORITY = {
     "contributions": 1.0,
 }
 
-# Default reranking / dedup settings.
+# How strongly source priority affects the final score: 0 disables the
+# boost (pure semantic ordering), larger values push authoritative
+# sources up harder. Scores stay bounded in [~0, 1] since the boost is
+# multiplicative: score *= (1 + (priority - 1) * SOURCE_BOOST_STRENGTH).
+SOURCE_BOOST_STRENGTH = 0.2
+
+# Reranking / deduplication toggles.
 RERANK_ENABLED = True
-RERANK_TOP_N = 20  # consider top N results for reranking/dedup
+RERANK_TOP_N = 20  # how many candidates to fetch before ranking
+
 DEDUP_ENABLED = True
-DEDUP_SCORE_TOLERANCE = 0.1  # score tolerance for near-duplicate removal
+# Token-containment overlap (fraction of the smaller chunk's tokens that
+# appear in a kept one) above which two same-source chunks count as a
+# near-duplicate. 1.0 = exact duplicates only.
+DEDUP_THRESHOLD = 0.85
+
