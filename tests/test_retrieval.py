@@ -152,8 +152,10 @@ def test_rerank_disabled_passthrough():
 # --------------------------------------------------------------------
 
 def test_retrieve_cross_source_and_dedup(tmp_path=None):
-    # Build a retriever that talks to a fake store so no embedding
-    # model is needed. Verifies dedup + source priority + metadata.
+    # Build a retriever that talks to a fake store and a stubbed
+    # embedder so no embedding model is loaded. Verifies dedup +
+    # source priority + metadata preservation.
+    from unittest import mock
     import tempfile
 
     class FakeStore:
@@ -177,7 +179,9 @@ def test_retrieve_cross_source_and_dedup(tmp_path=None):
          "metadata": {"source": "linkedin", "category": "skills"}},
     ])
 
-    results = r.retrieve("what are your skills", k=3)
+    fake_emb = np.zeros((1, 4), dtype=np.float32)
+    with mock.patch("src.retrieve.embed_query", return_value=fake_emb[0]):
+        results = r.retrieve("what are your skills", k=3)
 
     # resume should rank first due to priority boost.
     assert results[0].metadata["source"] == "resume"
@@ -200,6 +204,7 @@ def test_retrieve_empty_query():
 
 def test_retrieve_returns_at_most_k():
     import tempfile
+    from unittest import mock
 
     class FakeStore:
         def __init__(self, n):
@@ -215,7 +220,9 @@ def test_retrieve_returns_at_most_k():
 
     r = Retriever.__new__(Retriever)
     r.store = FakeStore(30)
-    res = r.retrieve("test", k=5)
+    with mock.patch("src.retrieve.embed_query",
+                    return_value=np.zeros(4, dtype=np.float32)):
+        res = r.retrieve("test", k=5)
     assert len(res) <= 5
 
 
